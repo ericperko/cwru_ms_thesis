@@ -1,0 +1,7 @@
+Eric Perko's CWRU MS Thesis papers and such...
+
+To make the pdf, you'll need the following installed:
+  1. Who knows right now...
+  2. Something else awesome and magical I bet?
+
+Then head into the thesis folder and type `make`.
