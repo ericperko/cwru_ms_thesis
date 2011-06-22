@@ -3,6 +3,7 @@ project(Thesis NONE)
 
 set(LATEX_CHAPTER_SOURCES
 	abstract.tex
+	chapter0.tex
 	chapter1.tex
 	chapter2.tex
 	chapter3.tex
