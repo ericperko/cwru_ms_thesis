@@ -18,4 +18,5 @@ set(LATEX_CHAPTER_SOURCES
 include(UseLATEX.cmake)
 add_latex_document(thesis.tex
 	INPUTS ${LATEX_CHAPTER_SOURCES}
+	BIBFILES bibliography.bib
 	)
