@@ -31,16 +31,18 @@ The second sensor on HARLIE used for indoor localization is an Analog Devices ME
 \caption{Analog Devices ADXRS150 Gyro as mounted on HARLIE \label{fig:yaw_rate_sensor}}
 \end{figure}
 
-The third sensor on HARLIE used for indoor localization is the SICK LIDAR (see \autoref{fig:sick_lms291}).
+The third sensor on HARLIE used for indoor localization is the SICK LIDAR (see \autoref{fig:sick_lms291}). This LIDAR (LIght Detection And Ranging) unit uses a beam of infrared light (905nm wavelength) to scan in 1\degree{} increments a 180\degree{} arc in front of the sensor, returning a complete 180\degree{} scan at a rate of 75Hz (see \autoref{fig:sample_sick_scan}). The LMS291 can detect objects out to a range of 80 meters with an accuracy of $\pm1$ centimeter \autocite{SICKLMS291Datasheet}. With this long range and excellent accuracy, the SICK is able to provide enough information to localize HARLIE precisely in an indoor environment (see \todo{add reference to localization section that talks about AMCL} for details). 
 
 \begin{figure}
 \centering
 \subfloat[SICK LMS291]{\includegraphics[width=0.4\textwidth]{images/sick_lms291}\label{fig:sick_lms291}}
 \hfill
-\subfloat[Sample LIDAR Scan \autocite{WikipediaSICKScan}]{\includegraphics[width=0.4\textwidth]{images/sample_scan}\label{fig:sample_sick_scan}}
+\subfloat[Sample LIDAR Scan \autocite{WikipediaSICKScan}. Top: Sensor in blue, laser beam in red, environment in green. Bottom: Sample data points for a partially complete scan of the environment shown above (beam moves couterclockwise).]{\includegraphics[width=0.4\textwidth]{images/sample_scan}\label{fig:sample_sick_scan}}
 \caption{SICK LIDAR \& Sample LIDAR Scan}
 \label{fig:sick_and_sample_scan}
 \end{figure}
+
+Harlie includes a number of other sensors, including cameras, a GPS receiver and sonar. Some like the GPS receiver, which allows for precise localization outdoors, would allow the methods described in the remainder of this thesis to function outdoors as well as indoors. Others like the camera could augment the LIDAR for indoor localization \autocite{Harper2009}.
 
 \subsection{Simulation}\label{subsec:simulation_setup}
 
