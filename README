@@ -2,6 +2,9 @@ Eric Perko's CWRU MS Thesis papers and such...
 
 To make the pdf, you'll need the following installed:
 * CMake
-* Some amount of LaTeX stuff
+* texlive
+* latex2html
+* imagemagick
+* biblatex
 
 Then head into the thesis folder and type `make`.
