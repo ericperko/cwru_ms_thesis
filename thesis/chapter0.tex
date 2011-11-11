@@ -44,6 +44,16 @@ The third sensor on HARLIE used for indoor localization is the SICK LIDAR (see \
 
 Harlie includes a number of other sensors, including cameras, a GPS receiver and sonar. Some like the GPS receiver, which allows for precise localization outdoors, would allow the methods described in the remainder of this thesis to function outdoors as well as indoors. Others such as the camera could augment the LIDAR for indoor localization \autocite{Harper2009}. Still others such as the sonar could be augmented and used to assist in detecting obstacles that the LIDAR cannot sense such as glass walls or materials with low infrared reflectivity.
 
+\begin{figure}
+\centering
+\includegraphics[width=0.75\textwidth]{images/cRIO}
+\caption{NI cRIO with 4 IO modules installed and connected to onboard sensors \label{fig:crio}}
+\end{figure}
+
+HARLIE also includes a pair of computers. The first of these is a National Instruments CompactRIO (cRIO) that consists of a 400MHz PowerPC running VxWorks (a hard real-time operating system), a Xilinx FPGA and a large number of input/output modules for connecting to the different sensors \todo{add ref to cRIO-9074 spec sheet} (see \autoref{fig:crio}). HARLIE's cRIO is used for two main functions: relative localization (see \autoref{sec:localization} for details) and providing velocity control of the two drive wheels. The cRIO takes a translational (forward/backward) velocity as well as rotational velocity and converts them into a velocity for each drive wheel \todo{add ref to diff drive math... maybe also include equations if needed}. These individual wheel velocities are then used as the setpoint for the PID controller \todo{add ref to PID controller or something}for each wheel --- by using the wheel encoders for feedback to these PID algorithms, velocity commands are executed promptly and accurately even on different types of surfaces. Accurate velocity control offloads some work that would otherwise have to be done in the higher-level motion planning subsystems to ensure that the robot base is executing commands properly. The cRIO receives velocity commands and sends localization and status information to HARLIE's main computer via UDP over an Ethernet network.
+
+The second computer on HARLIE is a custom-built Linux computer that includes an Intel Core i7 CPU clocked at 2.66GHz with up to eight simultaneous threads of execution and six gigabytes of RAM. This computer runs all of the obstacle mapping, absolute localization and motion planning discussed in later chapters. Since this computer is a standard Linux computer, many open-source libraries, programming languages and tools are available for use in those subsystems.
+
 \subsection{Simulation}\label{subsec:simulation_setup}
 
 While a physical platform is required for real world testing of a full navigation stack, field testing is impratical for gathering the amount of data requried to make any sort of generalization about the performance characteristics of the algorithms involved. In order to gather such a large amount of data pratically, a simulated robot was setup to mimic the characteristics of HARLIE. To do this, a number of steps were carried out.
