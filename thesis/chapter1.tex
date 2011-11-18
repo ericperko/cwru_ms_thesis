@@ -2,4 +2,25 @@
 
 This will detail problems in ROS's Navigation stack when we last looked at it (and perhaps a discussion of how it has changed in the interim)
 
+Outline:
+	Mapping
+		SimpleCostmap
+		Fixed Grid size - needs changed for different environments and may affect trajectory scoring
+		No option for temporal clearing of the map to reduce "leftovers" at small resolutions
+	Local planning
+		Scoring of trajectories
+		Trajectories come from a fixed list of velocities and omegas (cross-product)
+		simplistic cost function
+		holonomic vs diff-drive
+		scoring spin-in-place
+	global planning
+		dijkstra's planning
+		replan only as a last resort
+		may generate crappy plan since uses a circular robot with either inscribed or circumscribed radius
+	localization
+		defaults require tweaking for both map building and amcl
+		amcl needs tuned to prevent "pops"
+		
+
+
 ROS navigation \autocite{Marder-Eppstein2010}
