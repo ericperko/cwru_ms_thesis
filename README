@@ -3,6 +3,7 @@ Eric Perko's CWRU MS Thesis papers and such...
 To make the pdf, you'll need the following installed:
 * CMake
 * texlive
+* texlive-science
 * latex2html
 * imagemagick
 * biblatex
