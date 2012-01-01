@@ -38,7 +38,7 @@ The inputs to \autoref{alg:harlie_ekf_algorithm} are the previous state estimate
 
 \subsubsection{Prediction Step}\label{subsubsec:harlie_ekf_prediction}
 
-The prediction step is run every filter update, whether there are new measurements or not. This generates state estimates at a predictable, high fixed rate (50Hz). The filter runs at this high fixed rate so that the navigation control algorithms always have fresh state information for their control loops.
+The prediction step is run every filter update, whether there are new measurements or not. This generates state estimates at a predictable, high fixed rate (50 Hz). The filter runs at this high fixed rate so that the navigation control algorithms always have fresh state information for their control loops.
 
 \begin{equation}
 	x_{t-1} = 
@@ -67,7 +67,65 @@ The prediction step is run every filter update, whether there are new measuremen
 	\label{eq:harlie_ekf_state_covariance}
 \end{equation}
 
-\eqref{eq:harlie_ekf_state_covariance} is the covariance of the state estimate. 
+\eqref{eq:harlie_ekf_state_covariance} is the covariance of the state estimate. It is an $n\times n$ matrix, where $n$ is the number of elements in the state vector and arranged such that element $m,n$ of the covariance matrix is the covariance of the $m$-th element of the state vector with the $n$-th element of the state vector.
+
+\begin{equation}
+	f\left(x_{t-1}\right) =
+	\begin{bmatrix}
+		x + v \cdot dt \cdot \cos\left(\theta\right) \\
+		y + v \cdot dt \cdot \sin\left(\theta\right)  \\
+		\theta + \omega \cdot dt \\
+		v \\
+		\omega \\
+		b_{\omega}
+	\end{bmatrix}
+	\label{eq:harlie_ekf_process_model}
+\end{equation}
+
+\eqref{eq:harlie_ekf_process_model} is the process model used in line 1 of \autoref{alg:harlie_ekf_algorithm}. This function generates a prediction of the state at time $t$ given an estimate of the state at time $t-1$, where $dt$ is the time between filter updates (50 Hz or 0.02 seconds in this case). The particular process model used assumes that the robot maintains constant translational and rotational velocities, as well as a constant bias term; since these terms are not truly constant, the process noise must be large enough to include the changes in these values between filter update cycles. The model for the change in location and heading assumed that any rotations are pivot turns at the end of the motion; as such, it doesn't model constant curvature arcs. While there are other odometry models that do address constant curvature arcs (such as those in \autocite{ProbRobotics}), the model in \eqref{eq:harlie_ekf_process_model} is sufficiently accurate when run at the 50 Hz rate of the filter and computationally simpler than models that take into account constant curvature arcs. If the filter were slowed down, a more complex odometry model might become necessary to maintain accuracy. \todo{future work: try more complex odometry models and see if they increase accuracy}
+
+\begin{equation}
+	G =
+	\begin{bmatrix}
+		1 & 0 & -v \cdot dt \cdot \sin\left(\theta\right) & dt \cdot \cos\left(\theta\right) & 0 & 0 \\
+		0 & 1 & v \cdot dt \cdot \cos\left(\theta\right) & dt \cdot \sin\left(\theta\right) & 0 & 0 \\
+		0 & 0 & 1 & 0 & dt & 0 \\
+		0 & 0 & 0 & 1 & 0 & 0 \\
+		0 & 0 & 0 & 0 & 1 & 0 \\
+		0 & 0 & 0 & 0 & 0 & 1 
+	\end{bmatrix}
+	\label{eq:harlie_ekf_process_jacobian}
+\end{equation}
+
+\eqref{eq:harlie_ekf_process_jacobian} is the Jacobian of the process model \eqref{eq:harlie_ekf_process_model} with respect to the state vector \eqref{eq:harlie_ekf_state}.
+
+\begin{equation}
+	Q =
+	\begin{bmatrix}
+		\sigma_{x}^2 & 0 & 0 & 0 & 0 & 0 \\
+		0 & \sigma_{y}^2 & 0 & 0 & 0 & 0 \\
+		0 & 0 & \sigma_{\theta}^2 & 0 & 0 & 0 \\
+		0 & 0 & 0 & \sigma_{v}^2 & 0 & 0 \\
+		0 & 0 & 0 & 0 & \sigma_{\omega}^2 & 0 \\
+		0 & 0 & 0 & 0 & 0 & \sigma_{b_{\omega}}^2
+	\end{bmatrix}
+	\label{eq:harlie_ekf_process_noise}
+\end{equation}
+
+\eqref{eq:harlie_ekf_process_noise} is the noise in the process model. It represents the uncertainty of the model and must account for any unmodeled characteristics of the system (such as that the velocity is not constant). For HARLIE, $\sigma_{x} = 0.001$, $\sigma_{y} == 0.001$, $\sigma_{\theta} = 0.001$, $\sigma_{v} = \sqrt{10}$, $\sigma_{\omega} = \sqrt{10}$ and $\sigma_{b_{\omega}} = 1.0\times 10^{-5}$.
+
+\begin{equation}
+	ZeroOutBiasXYThetaCovariance\left(P_t\right) = 
+	\begin{bmatrix}
+		\sigma_x^2 & \ldots & \ldots & \ldots & \sigma_x\sigma_\omega & 0 \\
+		\vdots & \ddots & \ldots & \ldots & \sigma_y\sigma_\omega & 0 \\
+		\vdots & \vdots & \ddots & \ldots & \sigma_\theta\sigma_\omega & 0 \\
+		\vdots & \vdots & \vdots & \ddots & \ldots & \sigma_v\sigma_{b_{\omega}} \\
+		\sigma_\omega\sigma_x & \sigma_\omega\sigma_y & \sigma_\omega\sigma_\theta & \vdots & \ddots & \sigma_\omega\sigma_{b_{\omega}} \\
+		0 & 0 & 0 & \sigma_{b_{\omega}}\sigma_v & \sigma_{b_{\omega}}\sigma_\omega & \sigma_{b_{\omega}}^2
+	\end{bmatrix}
+	\label{eq:harlie_ekf_zero_bias_cov}
+\end{equation}
 
 \subsection{Absolute Localization}\label{subsec:absolute_localization}
 
