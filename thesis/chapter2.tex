@@ -127,6 +127,12 @@ The prediction step is run every filter update, whether there are new measuremen
 	\label{eq:harlie_ekf_zero_bias_cov}
 \end{equation}
 
+\eqref{eq:harlie_ekf_zero_bias_cov} is the function applied to the prediction covariance in line 3 of \autoref{alg:harlie_ekf_algorithm}. This function zeros out the covariance between the yaw rate bias $b_{\omega}$ and $x$, $y$ and $\theta$. This is necessary to prevent the $x$, $y$ or $\theta$ terms of the prediction from adjusting the bias - without applying this function, bias estimation would become unstable quickly due to the influence of those variables.
+
+\subsubsection{Encoder Measurement Update}\label{subsubsec:harlie_ekf_encoder_measurement}
+
+\subsubsection{Gyroscope Measurement Update}\label{subsubsec:harlie_ekf_gyro_measurement}
+
 \subsection{Absolute Localization}\label{subsec:absolute_localization}
 
 \begin{comment}
