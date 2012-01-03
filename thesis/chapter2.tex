@@ -191,6 +191,52 @@ The encoder measurement update runs whenever there is a new encoder readings. On
 
 \subsubsection{Gyroscope Measurement Update}\label{subsubsec:harlie_ekf_gyro_measurement}
 
+The gyroscope measurement update runs whenever there is a new gyroscope reading. On HARLIE, the gyroscope is sampled once every filter update, so there is always a new reading after completing the prediction step.
+
+\begin{equation}
+	z_t^i = 
+	\begin{bmatrix}
+		\omega_{sample}
+	\end{bmatrix}
+	\label{eq:harlie_ekf_gyro_z}
+\end{equation}
+
+\eqref{eq:harlie_ekf_gyro_z} is the form of the measurement returned by the gyroscope sampling component.
+
+\begin{equation}
+	h\left(\hat{x_t}\right) =
+	\begin{bmatrix}
+		\omega + b_{\omega}
+	\end{bmatrix}
+	\label{eq:harlie_ekf_gyro_h}
+\end{equation}
+
+\eqref{eq:harlie_ekf_gyro_h} is the function used in line 5 of \autoref{alg:harlie_ekf_algorithm} that generates a prediction of the gyroscope measurement, given the estimated state $\hat{x_t}$. \eqref{eq:harlie_ekf_gyro_h} is only used when $z_t^i$ comes from the gyroscope.
+
+\begin{equation}
+	H =
+	\begin{bmatrix}
+		0 & 0 & 0 & 0 & 1 & 1
+	\end{bmatrix}
+	\label{eq:harlie_ekf_gyro_jacobian}
+\end{equation}
+
+\eqref{eq:harlie_ekf_gyro_jacobian} is the Jacobian of \eqref{eq:harlie_ekf_gyro_h} with respect to \eqref{eq:harlie_ekf_state}.
+
+\begin{equation}
+	R =
+	\begin{bmatrix}
+		\omega_{sample}^2 \cdot \alpha_{gyro} + \gamma
+	\end{bmatrix}
+	\label{eq:harlie_ekf_gyro_measurement_noise}
+\end{equation}
+
+\eqref{eq:harlie_ekf_gyro_measurement_noise} is the noise in the gyroscope measurement. Analogously to the encoder noise, this noise model also has a variable $\left(\alpha_{gyro}\right)$ and constant $\left(\gamma\right)$ component. For HARLIE, $\alpha_{gyro} = 0.000048345$ and $\gamma = 0.00000019$.
+
+\subsubsection{Results}\label{subsubsec:relative_localization_results}
+
+\subsubsection{Discussion}\label{subsubsec:relative_localization_discussion}
+
 \subsection{Absolute Localization}\label{subsec:absolute_localization}
 
 \begin{comment}
