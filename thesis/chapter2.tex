@@ -115,7 +115,7 @@ The prediction step is run every filter update, whether there are new measuremen
 \eqref{eq:harlie_ekf_process_noise} is the noise in the process model. It represents the uncertainty of the model and must account for any unmodeled characteristics of the system (such as that the velocity is not constant). For HARLIE, $\sigma_{x} = 0.001$, $\sigma_{y} == 0.001$, $\sigma_{\theta} = 0.001$, $\sigma_{v} = \sqrt{10}$, $\sigma_{\omega} = \sqrt{10}$ and $\sigma_{b_{\omega}} = 1.0\times 10^{-5}$.
 
 \begin{equation}
-	ZeroOutBiasXYThetaCovariance\left(P_t\right) = 
+	\mathsf{ZeroOutBiasXYThetaCovariance}\left(P_t\right) = 
 	\begin{bmatrix}
 		\sigma_x^2 & \ldots & \ldots & \ldots & \sigma_x\sigma_\omega & 0 \\
 		\vdots & \ddots & \ldots & \ldots & \sigma_y\sigma_\omega & 0 \\
@@ -130,6 +130,64 @@ The prediction step is run every filter update, whether there are new measuremen
 \eqref{eq:harlie_ekf_zero_bias_cov} is the function applied to the prediction covariance in line 3 of \autoref{alg:harlie_ekf_algorithm}. This function zeros out the covariance between the yaw rate bias $b_{\omega}$ and $x$, $y$ and $\theta$. This is necessary to prevent the $x$, $y$ or $\theta$ terms of the prediction from adjusting the bias - without applying this function, bias estimation would become unstable quickly due to the influence of those variables.
 
 \subsubsection{Encoder Measurement Update}\label{subsubsec:harlie_ekf_encoder_measurement}
+
+The encoder measurement update runs whenever there is a new encoder readings. On HARLIE, the encoders are sampled once every filter update, so there is always a new encoder reading after completing the prediction step.
+
+\begin{equation}
+	z_t^i = 
+	\begin{bmatrix}
+		d_{left} \\
+		d_{right}
+	\end{bmatrix}
+	\label{eq:harlie_ekf_encoder_z}
+\end{equation}
+
+\eqref{eq:harlie_ekf_encoder_z} is the form of the measurement returned by measuring the encoders. $d_{left}$ and $d_{right}$ are the change in the left and right wheel encoders, respectively.
+
+\begin{equation}
+	h\left(\hat{x_t}\right) =
+	\begin{bmatrix}
+		\frac{1}{2} \cdot dt \cdot \left( 2 \cdot v + b \cdot \omega \right) \\
+		\frac{1}{2} \cdot dt \cdot \left( 2 \cdot v - b \cdot \omega \right) 
+	\end{bmatrix}
+	\label{eq:harlie_ekf_encoder_h}
+\end{equation}
+
+\eqref{eq:harlie_ekf_encoder_h} is the function used in line 5 of \autoref{alg:harlie_ekf_algorithm} that generates a prediction of the measurement, given the estimated state $\hat{x_t}$. \eqref{eq:harlie_ekf_encoder_h} is only used when $z_t^i$ comes from the encoders. $dt$ is again 0.02 seconds (50 Hz), since the encoder is sampled ever filter update. $b$ is the track width of the base. 
+
+\begin{equation}
+	v = \frac{d_{right}+d_{left}}{2}
+	\label{eq:harlie_ekf_odometry_model_v}
+\end{equation}
+
+\begin{equation}
+	\omega = \frac{d_{right} - d_{left}}{b}
+	\label{eq:harlie_ekf_odometry_model_w}
+\end{equation}
+
+\eqref{eq:harlie_ekf_odometry_model_v} and \eqref{eq:harlie_ekf_odometry_model_w} are the odometry equations that \eqref{eq:harlie_ekf_encoder_h} is based on. Using these two equations, the translational and rotational velocites can be related to the change in the individual encoders. $b$, the track width, is the distance along the axle between the two wheels. \todo{add ref to odometry model paper or mention derives from geometry}
+
+\begin{equation}
+	H =
+	\begin{bmatrix}
+		0 & 0 & 0 & dt & \frac{1}{2} \cdot b \cdot dt & 0 \\
+		0 & 0 & 0 & dt & -\frac{1}{2} \cdot b \cdot dt & 0 \\
+	\end{bmatrix}
+	\label{eq:harlie_ekf_encoder_jacobian}
+\end{equation}
+
+\eqref{eq:harlie_ekf_encoder_jacobian} is the Jacobian of \eqref{eq:harlie_ekf_encoder_h} with respect to \eqref{eq:harlie_ekf_state}.
+
+\begin{equation}
+	R =
+	\begin{bmatrix}
+		d_{left}^2 \cdot \alpha_{left} + \epsilon & 0 \\
+		0 & d_{right}^2 \cdot \alpha_{right} + \epsilon
+	\end{bmatrix}
+	\label{eq:harlie_ekf_encoder_measurement_noise}
+\end{equation}
+
+\eqref{eq:harlie_ekf_encoder_measurement_noise} is the noise in the encoder measurement. The noise model used has two componenets, one constant and one variable. $\epsilon$ is a small constant value to represent an error of $\pm 1$ encoder tick, so that even when there was no change in the encoders the measurement noise accounts for possible mismeasurement. $\alpha_{right}$ and $\alpha_{left}$ are parameters used to control the amount of variable noise applied to the measurement. This models the fact that the encoders become more unreliable when the robot is moving more quickly (or the wheels are slipping). For HARLIE, $\epsilon = 1.0\times10^{-8}$, $\alpha_{right} = 0.0002$ and $\alpha_{left} = 0.0002$.
 
 \subsubsection{Gyroscope Measurement Update}\label{subsubsec:harlie_ekf_gyro_measurement}
 
