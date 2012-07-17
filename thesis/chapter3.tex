@@ -35,7 +35,7 @@ Originally, only two segment types were used: line segments and constant curvatu
 
 \subsection{Steering Algorithms}\label{subsec:steering_algorithms}
 
-Two different steering algorithms were developed and evaluated for use in this precision navigation system. The first of these is an algorithm called \emph{second-order steering} (see \autoref{subsubsec:second_order_steering} \todo{fix the reference name to subsubsection}) and the second, developed to address deficiencies in the first, is called \emph{phase space steering}. Both of these algorithms have the same form, as laid out in \autoref{alg:generic_steering_algorithm}.
+Two different steering algorithms were developed and evaluated for use in this precision navigation system. The first of these is an algorithm called \emph{second-order steering} (see \autoref{subsubsec:second_order_steering} \todo{fix the reference name to subsubsection}) and the second, developed to address deficiencies in the first, is called \emph{phase space steering} (see \autoref{subsubsec:phase_space_steering}). Both of these algorithms have the same form, as laid out in \autoref{alg:generic_steering_algorithm}.
 
 \begin{algorithm}
 \caption{Generic Steering Algorithm}
@@ -51,20 +51,75 @@ $v$, $\omega$ = executeSteeringAlgorithm($\hat{x_t}$, $x_t$)\;
 
 The inputs to \autoref{alg:generic_steering_algorithm} are the desired robot state ($\hat{x_t}$) and the current robot state ($x_t$) as estimated by the precision localization system. The steering algorithm outputs are the translational velocity ($v$) and rotational velocity ($\omega$) that, when commanded to the robot base, are the best commands to ensure convergence to the desired state. Since these are only individual commands, not a sequence of them, the steering algorithm must be run at a regular rate, recomputing the commands each time, to ensure convergence. In this thesis, the steering algorithms were tuned to run at 20 Hz.
 
+Both steering algorithms use the same equation to determine the output speed command, $v$. \eqref{eq:steering_v_lfollow} gives this equation.
+
+\begin{equation}
+v = v_{des} + k_v \cdot Lfollow
+\label{eq:steering_v_lfollow}
+\end{equation}
+
+In \eqref{eq:steering_v_lfollow}, $v$ is the output desired velocity, $v_{des}$ is the desired velocity according to the input desired robot state and $k_v$ is a tunable gain constant. $Lfollow$ is the error between the robot's state and the desired state along the desired path. $Lfollow$ represents how far in front or behind the robot is from the desired state and, accordingly, modifies the desired velocity to correct this error along the desired path. For example, if the robot has fallen ``behind'' the desired state, the output velocity is increased such that it can reduce the tangential error (and hence $Lfollow$ term). See \autoref{subsec:lfollow_discussion_steering} \todo{fix subsection naming} for more discussion of the $Lfollow$ term.
+
 \subsubsection{Second-Order Steering}\label{subsubsec:second_order_steering}
 
+The initial steering algortihm used in this thesis is called \emph{second-order steering}. This algorithm implements \eqref{eq:steering_v_lfollow} and \eqref{eq:second_order_steering_omega}.
 
+\begin{equation}
+\omega_{cmd} = v \cdot \left(k_d \cdot d + k_{\Psi} \cdot \delta\Psi + \rho_{des}\right)
+\label{eq:second_order_steering_omega}
+\end{equation}
+
+In \eqref{eq:second_order_steering_omega}, $\omega_{cmd}$ is the output rotational velocity, $v$ is the output of \eqref{eq:steering_v_lfollow}, $\rho_{des}$ is the curvature from the desired state and $k_d$ and $k_{\Psi}$ are tunable gains. $\delta\Psi$ is the difference between the orientation of the desired state and the robot's current state (constrained to the interval $\left[-\pi,\pi\right]$). $d$ is the perpendicular offset of the robot's position from the desired state and represents how far ``off'' the desired path the robot is. Note that $d$ is calculated relative to the desired state extended along its tangent vector in both directions and not necessarily just the desired state's \emph{pose} member described in \autoref{table:desired_state_description}. 
+
+\begin{figure}
+\centering
+\includegraphics[width=0.75\textwidth]{images/steering_drawing}
+\caption{Steering Variable Diagram \label{fig:steering_drawing}}
+\end{figure}
+
+\autoref{fig:steering_drawing} is a graphical representation of $d$ and $\delta\Psi$ for a sample robot state and desired state. The black arrow in \autoref{fig:steering_drawing} is the desired state extended along its tangent vector in both directions, the rectangle with orange outline is the robot's current footprint, the blue arrow represents the robot's current position (base of the arrow) and heading (direction of arrow). $d$ in \autoref{fig:steering_drawing} is the $d$ term described above and used in \eqref{eq:second_order_steering_omega}. $dPsi$ in \autoref{fig:steering_drawing} is the $\delta\Psi$ term described above and used in \eqref{eq:second_order_steering_omega}.
+
+While \emph{second-order steering} is a straightforward control algorithm both theoretically and in implementation, it does have some significant drawbacks for precision navigation on an indoor mobile robot. The most significant drawback is that the attraction region \todo{better name for this than ``attraction region''?} of the controller (the contour in control space where the controller will converge to zero error) varies strongly with $k_d$ and $d$. When either of those values is too large, \eqref{eq:second_order_steering_omega} will be dominated by the $k_d \cdot d$ term and lead to very high rate rotational velocity commands. Because of their large magnitude, these commands will basically cause the robot to spin-in-place extremely fast or do large loops far from the desired state; either of these behaviors will not lead to convergence. For precision navigation, the steering algorithm should converge quickly to the desired path, necessitating larger values of $k_d$, but the larger the $k_d$ used, the less lateral offset $d$ required to put \emph{second-order steering} outside of its region of attraction.
+
+Solving this problem required a re-exaxmination of the \emph{second-order steering} algorithm. Specifically, there are two error terms used in \eqref{eq:second_order_steering_omega}: $k_d \cdot d$ and $k_{\Psi} \cdot \delta\Psi$. The $k_{\Psi} \cdot \delta\Psi$ term, which zeroes out error between the desired state's orientation and the robot's current orientation, is relatively stable because the error between desired orientation and actual robot orientation, $\delta\Psi$, is bounded to the interval $\left[-\pi,\pi\right]$. Because of that bounding constraint, $k_{\Psi}$ can be tuned relative to that interval to be both aggressive in converging to zero orientation error while not having a detrimental effect on the controller's attraction region. The other error term in \eqref{eq:second_order_steering_omega}, $k_d \cdot d$, zeroes out lateral offset error between the desired state and the robot's current state. In effect, it produces a desired heading error between the robot's current orientation and the desired state's orientation such that the robot will move towards the desired state and not simply along the desired state's orientation. This insight led the second steering algorithm developed for this thesis, \emph{phase space steering} (see \autoref{subsubsec:phase_space_steering}).
+
+\subsubsection{Phase Space Steering}\label{subsubsec:phase_space_steering}
+
+The second, improved steering algortihm used in this thesis is called \emph{phase space steering}. This algorithm implements \eqref{eq:steering_v_lfollow} and \eqref{eq:phase_space_steering_omega}.
+
+\begin{equation}
+\omega_{cmd} = k_\Psi \cdot \left( \delta\Psi - f\left( d \right) \right) + v * \rho_{des}
+\label{eq:phase_space_steering_omega}
+\end{equation}
+
+In \eqref{eq:phase_space_steering_omega}, $\omega_{cmd}$ is the output rotational velocity, $v$ is the output of \eqref{eq:steering_v_lfollow}, $\rho_{des}$ is the curvature from the desired state and $k_{\Psi}$ is a tunable gain. $\delta\Psi$ and $d$ have have the same meaning as previously described in \autoref{subsubsec:second_order_steering} and shown in \autoref{fig:steering_drawing}, with $\delta\Psi$ constrained to the interval $\left[-\pi,\pi\right]$. The key difference between \eqref{eq:second_order_steering_omega} and \eqref{eq:phase_space_steering_omega} is in the treatment of the lateral offset $d$. In \eqref{eq:phase_space_steering_omega}, $f$ is a non-linear mapping function that maps a given lateral offset $d$ to a desired $\delta\Psi$, such that that desired $\delta\Psi$ would cause the robot to head back towards the desired state and reduce the lateral offset $d$. The particular non-linear mapping function used in this thesis is a simple piecewise linear function, shown in \eqref{eq:phase_space_steering_linear_function}.
+
+\begin{equation}
+f\left( d \right) =
+	\begin{cases}
+		-\pi/2 & \text{if } s \cdot d < -\pi/2 \\
+		s \cdot d & \text{if } -\pi/2 \leq s \cdot d \leq \pi/2 \\
+		\pi/2 & \text{if } s \cdot d > \pi/2
+	\end{cases}
+	\label{eq:phase_space_steering_linear_function}
+\end{equation}
+
+In \eqref{eq:phase_space_steering_linear_function}, $d$ is the lateral offset that needs to be mapped to a desired $\delta\Psi$. $s$ is the slope of the line used and is the only tunable parameter of this mapping function. The output is bounded to the interval $\left[-\pi/2,\pi/2\right]$ as, for any robot orientation and lateral offset, no more than a ninety degree rotation is required to point the robot towards the desired state.
+
+
+
+\subsection{Lfollow Discussion}\label{subsec:lfollow_discussion_steering}
 
 \begin{comment}
 This section details the steering algorithms used by this precision navigation stack
 
 Specifically, the following will be discussed:
 \begin{enumerate}
-\item Second Order steering
+\item Second Order steering (done)
 \item Phase Space steering
 \item Lfollow for both linear paths and spin in places
 	Need to mention the interaction with the PID time constants and such
-\item Added a spin in place segment descriptor because of instabilities in the tiny arcs
+\item Added a spin in place segment descriptor because of instabilities in the tiny arcs (done)
 \end{enumerate}
 
 \end{comment}
