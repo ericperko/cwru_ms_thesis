@@ -92,7 +92,7 @@ The second, improved steering algortihm used in this thesis is called \emph{phas
 \label{eq:phase_space_steering_omega}
 \end{equation}
 
-In \eqref{eq:phase_space_steering_omega}, $\omega_{cmd}$ is the output rotational velocity, $v$ is the output of \eqref{eq:steering_v_lfollow}, $\rho_{des}$ is the curvature from the desired state and $k_{\Psi}$ is a tunable gain. $\delta\Psi$ and $d$ have have the same meaning as previously described in \autoref{subsubsec:second_order_steering} and shown in \autoref{fig:steering_drawing}, with $\delta\Psi$ constrained to the interval $\left[-\pi,\pi\right]$. The key difference between \eqref{eq:second_order_steering_omega} and \eqref{eq:phase_space_steering_omega} is in the treatment of the lateral offset $d$. In \eqref{eq:phase_space_steering_omega}, $f$ is a non-linear mapping function that maps a given lateral offset $d$ to a desired $\delta\Psi$, such that that desired $\delta\Psi$ would cause the robot to head back towards the desired state and reduce the lateral offset $d$. The particular non-linear mapping function used in this thesis is a simple piecewise linear function, shown in \eqref{eq:phase_space_steering_linear_function}.
+In \eqref{eq:phase_space_steering_omega}, $\omega_{cmd}$ is the output rotational velocity, $v$ is the output of \eqref{eq:steering_v_lfollow}, $\rho_{des}$ is the curvature from the desired state and $k_{\Psi}$ is a tunable gain. $\delta\Psi$ and $d$ have have the same meaning as previously described in \autoref{subsubsec:second_order_steering} and shown in \autoref{fig:steering_drawing}, with $\delta\Psi$ constrained to the interval $\left[-\pi,\pi\right]$. The key difference between \eqref{eq:second_order_steering_omega} and \eqref{eq:phase_space_steering_omega} is in the treatment of the lateral offset $d$. In \eqref{eq:phase_space_steering_omega}, $f$ is a non-linear mapping function that maps a given lateral offset $d$ to a desired $\delta\Psi$, such that that desired $\delta\Psi$ would cause the robot to head back towards the desired state and reduce the lateral offset $d$. The particular non-linear mapping function used in this thesis is a simple piecewise linear function, shown in \autoref{fig:phase_space_linear_function_graph} and given in \eqref{eq:phase_space_steering_linear_function}.
 
 \begin{equation}
 f\left( d \right) =
@@ -104,9 +104,18 @@ f\left( d \right) =
 	\label{eq:phase_space_steering_linear_function}
 \end{equation}
 
-In \eqref{eq:phase_space_steering_linear_function}, $d$ is the lateral offset that needs to be mapped to a desired $\delta\Psi$. $s$ is the slope of the line used and is the only tunable parameter of this mapping function. The output is bounded to the interval $\left[-\pi/2,\pi/2\right]$ as, for any robot orientation and lateral offset, no more than a ninety degree rotation is required to point the robot towards the desired state.
+In \eqref{eq:phase_space_steering_linear_function}, $d$ is the lateral offset that needs to be mapped to a desired $\delta\Psi$. $s$ is the slope of the line used and is the only tunable parameter of this mapping function. The output is bounded to the interval $\left[-\pi/2,\pi/2\right]$ as, for any robot orientation and lateral offset, no more than a ninety degree rotation is required to point the robot towards the desired state. Limiting the output to that interval also prevents arbitrarily large lateral offsets from removing the controller from its attraction region. For any $d$ and $\delta\Psi$, a properly tuned \emph{phase space steering} controller will eventually converge to the desired state vector given enough obstacle-free space.
 
+\begin{figure}[htbp]
+\centering
+\subfloat[Linear Function]{\includegraphics[width=0.5\textwidth]{images/phase_space_linear_function_graph}\label{fig:phase_space_linear_function_graph}}
+\hfill
+\subfloat[Hyperbolic Tangent Function]{\includegraphics[width=0.5\textwidth]{images/phase_space_tanh_function_graph}\label{fig:phase_space_tanh_function_graph}}
+\caption[Sample Phase Space Non-Linear Mapping Functions]{Sample Phase Space Non-Linear Mapping Functions. The horizontal axis in both of these graphs is the lateral offset $d$ and the vertical axis is the desired $\delta\Psi$}
+\label{fig:phase_space_sample_function_graphs}
+\end{figure}
 
+While the simple piecewise linear function used in this thesis worked well enough, different non-linear mapping functions could be even better. For example, \eqref{eq:phase_space_steering_linear_function} has a pair of discontinuities at the transitions between pieces, easily seen in \autoref{fig:phase_space_linear_function_graph}. These discontinuities did not lead to any observed problems, but could be removed while maintaing the same general shape by using a mapping function based on a sigmoid function (see \todo{add ref http://en.wikipedia.org/wiki/Sigmoid\_function}). See \autoref{fig:phase_space_tanh_function_graph} for an example of a sigmoid function based non-linear mapping that uses the hyperbolic tangent function. The hyperbolic tangent does not have any discontinuties as it approaches its limits and is easily shifted to the interval $\left[-\pi/2,\pi/2\right]$ by multiplying with $\pi/2$, so may be an attractive alternative to the simple piecewise linear function.
 
 \subsection{Lfollow Discussion}\label{subsec:lfollow_discussion_steering}
 
@@ -116,7 +125,7 @@ This section details the steering algorithms used by this precision navigation s
 Specifically, the following will be discussed:
 \begin{enumerate}
 \item Second Order steering (done)
-\item Phase Space steering
+\item Phase Space steering (done)
 \item Lfollow for both linear paths and spin in places
 	Need to mention the interaction with the PID time constants and such
 \item Added a spin in place segment descriptor because of instabilities in the tiny arcs (done)
