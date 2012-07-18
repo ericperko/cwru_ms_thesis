@@ -1,5 +1,46 @@
 \section{Trajectory Generation}
 
+Another major compenent of the path execution subsystem developed in this thesis is trajectory generation. This componenet sits between the steering and path planning components, taking global paths from path planning and outputting desired states that the steering component attempts to achieve. The trajectory generator fills the same role as the ``base\_local\_planner'' described in \autoref{subsec:base_local_planner}. The input to the trajectory generator is a sequence of path segments, described in \autoref{subsec:path_segment}. The output is a desired state for the current timestep, as described in \autoref{subsec:steering_state}.
+
+\subsection{Path Segment Description}\label{subsec:path_segment}
+
+The path segment used by the trajectory generator developed for this thesis is described in \autoref{table:path_segment_description}.
+
+\begin{table}[htbp]
+	\begin{tabularx}{\textwidth}{|r|X|}
+		\hline
+		Name & Description \\
+		\hline
+		header & This is a standard ROS header type that contains information such as the reference frame the rest of the fields are in and the timestamp for when the path segment was generated \\
+		\hline
+		segment\_type & An integer enum representing the type this segment, such as a straight line segment, constant curvature arc segment or spin-in-place segment. \\
+		\hline
+		segment\_number & The ID number of the segment that generated this state. \\
+		\hline
+		segment\_length & The length of the segment. Whether it is in meters or radians depends on the \emph{segment\_type} \\
+		\hline
+		reference\_point & The reference point for this path segment. Interpretation depends on the \emph{segment\_type} \\
+		\hline
+		initial\_tangent\_angle & The intial tangent angle for this segment. Interpretation depends on the \emph{segment\_type} \\
+		\hline
+		curvature & The curvature of this segment. Exact interpretation depends on the \emph{segment\_type} \\
+		\hline
+		max\_speed & A pair of the maximum translational speed and maximum rotational speed to be used for this segment \\
+		\hline
+		min\_speed & A pair of the minimum translational speed and minimum rotational speed to be used for this segment \\	
+		\hline
+		acceleration\_limit & The acceleration limit for this segment. Whether it is in $m/s^2$ or $rads/s^2$ depends on the \emph{segment\_type} \\
+		\hline
+		deceleration\_limit	& The deceleration limit for this segment. Whether it is in $m/s^2$ or $rads/s^2$ depends on the \emph{segment\_type} \\
+		\hline
+	\end{tabularx}
+	\caption{Path Segment State Field Description \label{table:path_segment_description}}
+\end{table}
+
+
+
+\begin{comment}
+
 \begin{enumerate}
 \item talk about where the Lfollow feedback was used and how it impacted the performance
 \item the math!
@@ -7,3 +48,5 @@
 \item octocostmap/costmap3d
 
 \end{enumerate}
+
+\end{comment}
