@@ -106,7 +106,7 @@ f\left( d \right) =
 
 In \eqref{eq:phase_space_steering_linear_function}, $d$ is the lateral offset that needs to be mapped to a desired $\delta\Psi$. $s$ is the slope of the line used and is the only tunable parameter of this mapping function. The output is bounded to the interval $\left[-\pi/2,\pi/2\right]$ as, for any robot orientation and lateral offset, no more than a ninety degree rotation is required to point the robot towards the desired state. Limiting the output to that interval also prevents arbitrarily large lateral offsets from removing the controller from its attraction region. For any $d$ and $\delta\Psi$, a properly tuned \emph{phase space steering} controller will eventually converge to the desired state vector given enough obstacle-free space.
 
-\begin{figure}[htbp]
+\begin{figure}
 \centering
 \subfloat[Linear Function]{\includegraphics[width=0.5\textwidth]{images/phase_space_linear_function_graph}\label{fig:phase_space_linear_function_graph}}
 \hfill
@@ -119,6 +119,28 @@ While the simple piecewise linear function used in this thesis worked well enoug
 
 \subsection{Lfollow Discussion}\label{subsec:lfollow_discussion_steering}
 
+As mentioned in \autoref{subsec:steering_algorithms}, the $Lfollow$ term of \eqref{eq:steering_v_lfollow} deserves further discussion, specifically the interaction with HARLIE's lower-level speed control algorithms. For each wheel drive wheel, HARLIE runs an independent proportional-integral-derivative (PID) controller \todo{add ref to http://en.wikipedia.org/wiki/PID\_controller}. The job of HARLIE's PIDs is to ensure that each wheel's actual velocity converges on its commanded velocity, even on different surfaces or with different amounts of resistance. This makes for much more accurate motion than simple open-loop control (essentially just the proportional part of the PID), but is sensitive to tuning of the P, I and D parameters. There were two different sets of PID parameters used on HARLIE: one set of parameters made the wheel speed controllers overdamped systems while another set made them critically damped systems. In an overdamped system, the PID controller doesn't take the process variable (wheel velocity in this case) above the setpoint (commanded wheel velocity in this case); in a crtically damped system, the PID controller quickly ramps the process variable up to the setpoint but will oscillate (with damping) around the setpoint until eventually converging on the setpoint.
+
+For $Lfollow$, the important difference between the overdamped and critically damped controllers is the different time constant (how long it takes for the PID to achieve the setpoint). The overdamped controller takes longer to achieve the commanded velocity than the critically damped controller. Where this becomes a problem is that the $Lfollow$ term also has a sort of integral effect if the time constant on the underlying speed controller is long (note that HARLIE's PIDs ran at 100 Hz, so updated about 5 times per steering loop). To see how this causes issues, consider the following sequence of events that could take place with an overdamped velocity controller:
+
+\begin{enumerate}
+\item Robot starts up and awaits new commands
+\item Steering gets a new desired state and outputs a set of commands to the robot base
+\item Overdamped velocity controllers get the wheel velocities part of the way to the desired velocities
+\item Steering recomputes errors and, because the base did not reach the desired speed (and therefore desired position), $Lfollow$ shows that the robot has fallen behind the state. Steering outputs larger velocity commands to make up for falling behind.
+\item Overdamped velocity controllers again do not get the wheel velocities to the desired velocities
+\item Steering recomputes errors again and, once again, finds that it's fallen behind, causing $Lfollow$ to again increase velocities
+\item Overdamped velocity controllers still don't quite make it to the desired velocities
+\item Steering recomputes errors again and, this time, finds that it's ahead of the desired state, causing $Lfollow$ to decrease the desired velocities
+\item Overdamped controllers attempt to reduce velocity, but don't get quite far enough
+\item Steering recomputes errors and is still ahead, further reducing desired velocities
+\item Overdamped controllers get close to reduced velocities
+\item Steering recomputes errors and finds that it has fallen behind the desired state, causing $Lfollow$ to increase the desired velocities
+\item Repeat from 3
+\end{enumerate}
+
+This situation easily illustrates the conflict that can arise when the steering system uses $Lfollow$ with a overdamped low-level velocity controllers that have a long time constant. In this case, the $Lfollow$ term causes the velocity commands to oscillate and never converge to the velocity that is part of the desired state. This situation was easily resolved by tuning the low-level velocity controllers to be critically damped as opposed to overdamped. This caused the velocity controllers to get the actual wheel velocities very close to the desired velocities promptly, so the $Lfollow$ term did not adjust the desired velocity any appreciable amount. This avoided the oscillations caused by $Lfollow$ when used with the overdamped controller and proved to be a better setup for precision navigation.
+
 \begin{comment}
 This section details the steering algorithms used by this precision navigation stack
 
@@ -126,7 +148,7 @@ Specifically, the following will be discussed:
 \begin{enumerate}
 \item Second Order steering (done)
 \item Phase Space steering (done)
-\item Lfollow for both linear paths and spin in places
+\item Lfollow for both linear paths and spin in places (done)
 	Need to mention the interaction with the PID time constants and such
 \item Added a spin in place segment descriptor because of instabilities in the tiny arcs (done)
 \end{enumerate}
