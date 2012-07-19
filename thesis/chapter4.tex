@@ -1,10 +1,10 @@
-\section{Trajectory Generation}
+\section{Trajectory Generation}\label{sec:trajectory_generation}\todo{Wyatt, any references for trajectory generation stuff that would be useful for this section?}
 
 Another major compenent of the path execution subsystem developed in this thesis is trajectory generation. This componenet sits between the steering and path planning components, taking global paths from path planning and outputting desired states that the steering component attempts to achieve. The trajectory generator fills the same role as the ``base\_local\_planner'' described in \autoref{subsec:base_local_planner}. The input to the trajectory generator is a sequence of path segments, described in \autoref{subsec:path_segment}. The output is a desired state for the current timestep, as described in \autoref{subsec:steering_state}.
 
 \subsection{Path Segment Description}\label{subsec:path_segment}
 
-The path segment used by the trajectory generator developed for this thesis is described in \autoref{table:path_segment_description}.
+The path segment used by the trajectory generator developed for this thesis is described in \autoref{table:path_segment_description}. There are three different types of path segments used in this thesis -- straight lines, smooth constant curvature arcs and spin-in-places.
 
 \begin{table}[htbp]
 	\begin{tabularx}{\textwidth}{|r|X|}
@@ -23,7 +23,7 @@ The path segment used by the trajectory generator developed for this thesis is d
 		\hline
 		initial\_tangent\_angle & The intial tangent angle for this segment. Interpretation depends on the \emph{segment\_type} \\
 		\hline
-		curvature & The curvature of this segment. Exact interpretation depends on the \emph{segment\_type} \\
+		curvature & The curvature of this segment. Exact interpretation depends on the \emph{segment\_type}. For straight lines curvature should be 0.0 \\
 		\hline
 		max\_speed & A pair of the maximum translational speed and maximum rotational speed to be used for this segment \\
 		\hline
@@ -37,7 +37,11 @@ The path segment used by the trajectory generator developed for this thesis is d
 	\caption{Path Segment State Field Description \label{table:path_segment_description}}
 \end{table}
 
+Of the fields listed in \autoref{table:path_segment_description}, the ones requiring the most explanation are the \emph{reference\_point} and the \emph{initial\_tangent\_angle}. The \emph{reference\_point} can have the following meanings, depending on \emph{segment\_type}. For a straight line segment, the reference point is the start point of the line segment. For a constant curvature arc, the reference point is the center of the circle that the arc belongs to (the radius of that circle is $1/curvature$). For a spin-in-place segment, the reference point is the point about which to spin. The \emph{initial\_tangent\_angle} can have the following means, depending on \emph{segment\_type}. For a straight line segment, the initial tangent angle is the direction of the line segment. For a constant curvature arc, the initial tangent angle defines the actual point along the circle where the the arc segment begins. For a spin-in-place segment, the initial tangent angle is angle that the spin should start from.
 
+As discussed in \autoref{subsec:steering_state}, the spin-in-place segment type was added to the original path segment types to avoid numerical instability issues when using arcs with very small radii.
+
+\subsection{Trajectory Generation Algorithm}\label{subsec:trajectory_generation_algorithm}
 
 \begin{comment}
 
