@@ -4,7 +4,7 @@ Another major compenent of the path execution subsystem developed in this thesis
 
 \subsection{Path Segment Description}\label{subsec:path_segment}
 
-The path segment used by the trajectory generator developed for this thesis is described in \autoref{table:path_segment_description}. There are three different types of path segments used in this thesis -- straight lines, smooth constant curvature arcs and spin-in-places.
+The path segment used by the trajectory generator developed for this thesis is described in \autoref{table:path_segment_description}. There are three different types of path segments used in this thesis -- straight lines, smooth constant curvature arcs and spin-in-places. One important assumption about these path segments is that, for a given sequence of segments, they will already be bleneded together to remove any discontinuities in the geometric parameterization between the end of a segment and the beginning of the following segment.
 
 \begin{table}[htbp]
 	\begin{tabularx}{\textwidth}{|r|X|}
@@ -42,6 +42,35 @@ Of the fields listed in \autoref{table:path_segment_description}, the ones requi
 As discussed in \autoref{subsec:steering_state}, the spin-in-place segment type was added to the original path segment types to avoid numerical instability issues when using arcs with very small radii.
 
 \subsection{Trajectory Generation Algorithm}\label{subsec:trajectory_generation_algorithm}
+
+The trajectory generation algorithm used in this thesis is detailed in \autoref{alg:trajectory_generation_algorithm}. On HARLIE, this loop ran at 20 Hz to regularly send commands to the steering algorithms detailed in \autoref{subsec:steering_algorithms}. Note that the trajectory generator and steering algorithm, while both run at 20 Hz, they are not explicitly synchronized.
+
+\begin{algorithm}
+\caption{Trajectory Generation Algorithm}
+\label{alg:trajectory_generation_algorithm}
+\DontPrintSemicolon
+\SetKwFunction{MakeHaltState}{MakeHaltState}
+\SetKwFunction{GetCurrentRobotState}{GetCurrentRobotState}
+
+\KwIn{last\_desired\_state, path, segment\_number, segment\_distance}
+\KwOut{desired\_state, segment\_number, segment\_distance}
+
+$current\_robot\_state$ = \GetCurrentRobotState{} \;
+\eIf{path $\neq \emptyset$}
+{
+	
+}
+{
+	$segment\_number$ = $0$ \; \nllabel{empty_path_start}
+	$segment\_distance$ = $0.0$ \;
+	$desired\_state$ = \MakeHaltState{current\_robot\_state} \; \nllabel{empty_path_end}
+}
+
+\end{algorithm}
+
+Lines \ref{empty_path_start} to \ref{empty_path_end} of \autoref{alg:trajectory_generation_algorithm}
+
+\todo{MakeHaltState algorithm/description}
 
 \begin{comment}
 
