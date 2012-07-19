@@ -1,6 +1,6 @@
 \section{Trajectory Generation}\label{sec:trajectory_generation}\todo{Wyatt, any references for trajectory generation stuff that would be useful for this section?}
 
-Another major compenent of the path execution subsystem developed in this thesis is trajectory generation. This componenet sits between the steering and path planning components, taking global paths from path planning and outputting desired states that the steering component attempts to achieve. The trajectory generator fills the same role as the ``base\_local\_planner'' described in \autoref{subsec:base_local_planner}. The input to the trajectory generator is a sequence of path segments, described in \autoref{subsec:path_segment}. The output is a desired state for the current timestep, as described in \autoref{subsec:steering_state}.
+Another major compenent of the path execution subsystem developed in this thesis is trajectory generation. This componenet sits between the steering and path planning components, taking global paths from path planning and outputting desired states that the steering component attempts to achieve. The trajectory generator fills the same role as the ``base\_local\_planner'' described in \autoref{subsec:base_local_planner}. The input to the trajectory generator is an ordered sequence of path segments (called a \emph{path}). The path segments are described in \autoref{subsec:path_segment}. The output is a desired state for the current timestep, as described in \autoref{subsec:steering_state}.
 
 \subsection{Path Segment Description}\label{subsec:path_segment}
 
@@ -43,7 +43,9 @@ As discussed in \autoref{subsec:steering_state}, the spin-in-place segment type 
 
 \subsection{Trajectory Generation Algorithm}\label{subsec:trajectory_generation_algorithm}
 
-The trajectory generation algorithm used in this thesis is detailed in \autoref{alg:trajectory_generation_algorithm}. On HARLIE, this loop ran at 20 Hz to regularly send commands to the steering algorithms detailed in \autoref{subsec:steering_algorithms}. Note that the trajectory generator and steering algorithm, while both run at 20 Hz, they are not explicitly synchronized.
+The trajectory generation algorithm used in this thesis is detailed in this section. On HARLIE, this loop ran at 20 Hz to regularly send commands to the steering algorithms detailed in \autoref{subsec:steering_algorithms}. Note that the trajectory generator and steering algorithm, while both run at 20 Hz, they are not explicitly synchronized.
+\todo{Better access to the struct things when they are like $state_t.velocity$}
+\todo{Use $\leftarrow$ or = for assignment of variables in algorithms?}
 
 \begin{algorithm}
 \caption{Trajectory Generation Algorithm}
@@ -51,26 +53,102 @@ The trajectory generation algorithm used in this thesis is detailed in \autoref{
 \DontPrintSemicolon
 \SetKwFunction{MakeHaltState}{MakeHaltState}
 \SetKwFunction{GetCurrentRobotState}{GetCurrentRobotState}
+\SetKwFunction{UpdateSegmentNumberAndDistance}{UpdateSegNumAndDist}
+\SetKwFunction{ComputeVelocityCommand}{ComputeVelocityCommand}
+\SetKwFunction{ComputeDesiredPose}{ComputeDesiredPose}
 
-\KwIn{last\_desired\_state, path, segment\_number, segment\_distance}
-\KwOut{desired\_state, segment\_number, segment\_distance}
+\KwIn{$state_{t-1}$, $path$, $i_{t-1}$, $l_{t-1}$}
+\KwOut{$state_t$, $i_t$, $l_t$}
 
-$current\_robot\_state$ = \GetCurrentRobotState{} \;
+$robot\_state_t$ = \GetCurrentRobotState{} \;
 \eIf{path $\neq \emptyset$}
 {
-	
+	\tcp{Compute new desired state}
+	$i_t$, $l_t$ = \UpdateSegmentNumberAndDistance{$robot\_state_t$, $path$, $i_{t-1}$, $l_{t-1}$, $state_{t-1}$} \;
+	$v_t$ = \ComputeVelocityCommand{$path$, $i_t$, $l_t$} \;
+	$pose_t$ = \ComputeDesiredPose{$path$, $i_t$, $l_t$} \;
+	$state_t.segment\_type$ = $path\left[i_t\right].segment\_type$ \;
+	$state_t.pose$ = $pose_t$ \;
+	$state_t.rho$ = $path\left[i_t\right].curvature$ \;
+	$state_t.velocity$ = $v_t$ \;
+	\;
+	\tcp{Check new desired state for collisions}
+	\If{$state_t$ will be in collision}
+	{
+		$state_t$ = \MakeHaltState{$robot\_state_t$} \;
+	}
 }
 {
-	$segment\_number$ = $0$ \; \nllabel{empty_path_start}
-	$segment\_distance$ = $0.0$ \;
-	$desired\_state$ = \MakeHaltState{current\_robot\_state} \; \nllabel{empty_path_end}
+	$i_t$ = $0$ \;
+	$l_t$ = $0.0$ \;
+	$state_t$ = \MakeHaltState{$robot\_state_t$} \;
 }
+\end{algorithm}
+
+\autoref{alg:trajectory_generation_algorithm} describes the trajectory generation algorithm that runs at the loop rate of 20 Hz. Its inputs are the last desired state ($state_{t-1}$), the current path from the path planner ($path$), the last segment number being executed ($i_{t-1}$) and the distance traveled along that segment already ($l_{t-1}$). The outputs (which are fed into the the algorithm on the next loop as well as being sent to the steering algorithm) are the current desired state ($state_t$), the current segment number being executed ($i_t$) and the distance traveled along that segment after this loop ends ($l_t$). Note that the segment number being executed, $i_t$, is an index into the sequence of path segments contained in the $path$. Also note that all of the algorithms described here assume that positions and orientations have all been placed in the same reference frame; on HARLIE, this was done with the ROS ``tf'' library (see \todo{add ref to ros tf library}).
+
+There are a number of algorithms used in \autoref{alg:trajectory_generation_algorithm}. Two of these are fairly simple: \GetCurrentRobotState and \MakeHaltState. \GetCurrentRobotState gets the current robot position, orientation and velocities in a robot specific manner. For HARLIE, this information came from the output of the localization subsystem described in \autoref{sec:localization}. \MakeHaltState takes the give state (usually the current robot state) and generates a state that would cause the steering algorithms to stop and maintain that state. In this case, it simply generates a spin-in-place state at the robot's current position and orientation with zero speeds and curvatures; effectively, this state causes steering to stop both translational and rotational motion until given a new commanded state.
+
+\SetKwFunction{Length}{Length}
+
+The other three algorithms used in \autoref{alg:trajectory_generation_algorithm} are more complicated and require more detailed explanation. In all of these algortihms, \Length is a simple function that returns the number of path segments in the $path$ it is given. All of this is based on zero-indexed sequences (such as arrays in C) as opposed to one-indexed containers such as those found in Matlab.
+
+\begin{algorithm}
+\caption{Update Segment Number and Distance Algorithm}
+\label{alg:update_seg_num_and_dist_algorithm}
+\DontPrintSemicolon
+
+\KwIn{$robot\_state_t$, $path$, $i_{t-1}$, $l_{t-1}$, $state_{t-1}$}
+\KwOut{$i_t$, $l_t$}
+
+\If{$i_{t-1} \geq \Length{path}$}
+{
+	$i_t$ = $\Length{path}-1$ \;
+	$end$ = true \;
+}
+
+$\delta l$ = $state_{t-1}.velocity \cdot dt$ \;
+
+\eIf{$path\left[i_t\right]$ is a spin-in-place segment}
+{
+	$l_t$ = $l_{t-1} + \delta l$ \;	
+}
+{
+	$l_t$ = $l_{t-1} + \delta l \cdot \cos\left(state_{t-1}.orientation - robot\_state_t.orientation\right) $ \; \nllabel{update_seg_num_project_onto_des_tangent_vec}
+}
+
+$\hat l$ = $path\left[i_t\right].segment\_length$ \;
+\If{$l_t > \hat l$}
+{
+	$l_t$ = $0.0$ \;
+	$i_t$ = $i_t + 1$ \;
+}
+
+\If{$i_t \geq \Length{path}$}
+{
+	$i_t$ = $\Length{path}-1$ \;
+	$end$ = true \;
+}
+
+$\hat l$ = $path\left[i_t\right].segment\_length$ \; \nllabel{update_seg_num_seg_num_may_have_changed}
+
+\If{$end$ is true}
+{
+	$l_t$ = $\hat l$ \;
+}
+
 
 \end{algorithm}
 
-Lines \ref{empty_path_start} to \ref{empty_path_end} of \autoref{alg:trajectory_generation_algorithm}
 
-\todo{MakeHaltState algorithm/description}
+
+\todo{UpdateSegNumAndDist algorithm/description}
+\todo{ComputeVelocityCommand algorithm/description}
+\todo{ComputeDesiredPose algorithm/description}
+
+\subsection{Adding Feedback for Planning}\label{subsec:trajectory_generation_actionlib}
+
+\subsection{Collision Detection}\label{subsec:trajectory_generation_costmap3d}
 
 \begin{comment}
 
