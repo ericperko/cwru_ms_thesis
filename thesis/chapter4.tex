@@ -91,7 +91,7 @@ There are a number of algorithms used in \autoref{alg:trajectory_generation_algo
 
 \SetKwFunction{Length}{Length}
 
-The other three algorithms used in \autoref{alg:trajectory_generation_algorithm} are more complicated and require more detailed explanation. In all of these algortihms, \Length is a simple function that returns the number of path segments in the $path$ it is given. These algorithms are based on zero-indexed sequences (such as arrays in C) as opposed to one-indexed containers such as those found in Matlab.
+The other three algorithms used in \autoref{alg:trajectory_generation_algorithm} are more complicated and require more detailed explanation. In all of these algortihms, \Length is a simple function that returns the number of path segments in the $path$ it is given. These algorithms are based on zero-indexed sequences (such as arrays in C) as opposed to one-indexed containers such as those found in Matlab. Also, in all of these algorithms, $dt$ is the time since the last loop ended (on HARLIE, $dt = \frac{1}{20 Hz}$).
 
 \begin{algorithm}
 \caption{Update Segment Number and Distance Algorithm}
@@ -143,8 +143,59 @@ $\hat l$ = $path\left[i_t\right].segment\_length$ \; \nllabel{update_seg_num_seg
 
 Two important details of this computation are on \autoref{update_seg_num_project_onto_des_tangent_vec} and \autoref{update_seg_num_seg_num_may_have_changed} of \autoref{alg:update_seg_num_and_dist_algorithm}. \autoref{update_seg_num_project_onto_des_tangent_vec} projects the robot's motion onto the the tangent vector of the last state. This prevents situations where the robot is moving nearly orthogonal to the desired state's tangent vector from advancing the distance traveled along the path segment too far for the actual distance along the path segment traveled. These situations can occur while using \emph{phase space steering} if there is a large lateral offset from the path -- \emph{phase space steering} is designed to move nearly orthogonal to the desired state's tangent vector in that situation. \autoref{update_seg_num_seg_num_may_have_changed} is required to ensure that the correct segment current segment and segment length is selected, even after all of the adjustments to the current segment number ($i_t$) have been made.
 
+\begin{algorithm}
+\caption{Compute Velocity Command Algorithm}
+\label{alg:compute_velocity_command_algorithm}
+\DontPrintSemicolon
 
-\todo{ComputeVelocityCommand algorithm/description}
+\KwIn{$path$, $i_t$, $l_t$}
+\KwOut{$v_t$}
+
+\eIf{$path\left[i_t\right]$ is a spin-in-place segment}
+{
+	$v_{t+1}$ = $0.0$ \;
+	$v_t$ = $path\left[i_t\right].max\_speed.omega$ \;
+}
+{
+	$v_t$ = $path\left[i_t\right].max\_speed.linear$ \;
+	\eIf{$i_t < \Length{path} - 1$}
+	{
+		$v_{t+1}$ = $path\left[i_t + 1 \right].max\_speed.linear$ \;
+	}
+	{
+		$v_{t+1}$ = $0.0$ \;
+	}
+}
+
+$dec$ = $path\left[i_t\right].deceleration\_limit$ \;
+$dec\_dist$ = $\frac{\left( v_t + v_{t+1} \right)}{2.0} \cdot \frac{\left( v_t - v_{t+1} \right)}{dec}$ \;
+
+$rem$ = $path\left[i_t\right].segment\_length - l_t$ \;
+\uIf{$rem < 0.0$}
+{
+	$rem$ = $0.0$ \;
+}
+\uElseIf{$rem < dec\_dist$}
+{
+	$v_t$ = $\sqrt{2.0 \cdot rem \cdot dec + v_{t+1}^2}$ \;
+}
+\Else
+{
+	$v_t$ = $v_t + path\left[i_t\right].accel\_limit \cdot dt$ \;
+}
+
+\eIf{$path\left[i_t\right]$ is a spin-in-place segment}
+{
+	clamp $v_t$ to interval $\left[ path\left[i_t\right].min\_speed.omega, path\left[i_t\right].max\_speed.omega \right]$ \;
+}
+{
+	clamp $v_t$ to interval $\left[ path\left[i_t\right].min\_speed.linear, path\left[i_t\right].max\_speed.linear \right]$ \;
+}
+
+\end{algorithm}
+
+\autoref{alg:compute_velocity_command_algorithm} is the \ComputeVelocityCommand function used in \autoref{alg:trajectory_generation_algorithm}. Its inputs are the current path ($path$), the segment number being executed ($i_t$) and distance already traveled along that segment ($l_t$), as output by \autoref{alg:update_seg_num_and_dist_algorithm}. Its only output is the desired velocity command ($v_t$). \autoref{alg:compute_velocity_command_algorithm} has three steps. First, the algorithm initializes to the max speed for the current segment ($v_t$) and determines the max speed of the next segment ($v_{t+1}$). Next, it determines whether it can continue accelerating or needs to start braking in order to slow down to $v_{t+1}$ before the beginning of the next segment. Finally, the calculated velocity command $v_t$ is clamped to fall within the interval defined by the current segment's minimum and maximum speeds. After clamping, $v_t$ calculation is complete.
+
 \todo{ComputeDesiredPose algorithm/description}
 
 \subsection{Adding Feedback for Planning}\label{subsec:trajectory_generation_actionlib}
