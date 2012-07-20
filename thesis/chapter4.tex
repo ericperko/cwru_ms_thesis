@@ -47,6 +47,7 @@ The trajectory generation algorithm used in this thesis is detailed in this sect
 
 \todo{Better access to the struct things when they are like $state_t.velocity$}
 \todo{Use $\leftarrow$ or = for assignment of variables in algorithms?}
+\todo{add figure of the different path segments with labels for the geometric primitive bits and the desired state output}
 
 \begin{algorithm}
 \caption{Trajectory Generation Algorithm}
@@ -256,10 +257,13 @@ $\Psi$  = $path\left[i_t\right].init\_tan\_angle$ \;
 
 \autoref{alg:compute_desired_pose_algorithm} is the \ComputeDesiredPose function used in \autoref{alg:trajectory_generation_algorithm}. Its inputs are the current path ($path$), the segment number being executed ($i_t$) and distance already traveled along that segment ($l_t$), as output by \autoref{alg:update_seg_num_and_dist_algorithm}. Its only output is the desired pose ($pose_t$). \autoref{alg:compute_desired_pose_algorithm} is made up of three cases, depending on what type of path segment the pose is being computed from. For a straight line segment, \autoref{alg:compute_desired_pose_algorithm} moves the reference point in the direction of the tangent vector (as defined by the path segment's initial tangent angle and sets the orientation to face along that tangent vector. For a constant curvature arc segment, it must find the correct point along the circle $\frac{1}{ | \rho | }$ away from the segment's reference point as well as compute the correct tangent angle for that point on the circle. For a spin-in-place segment, it only needs to set the desired pose's orientation according to how far along the segment the trajectory generator is; because it is a spin-in-place, the desired position is the same as the segment's reference point.
 
-
 \subsection{Adding Feedback for Planning}\label{subsec:trajectory_generation_actionlib}
 
+In the original design of the trajectory generator, the outputs of \autoref{alg:trajectory_generation_algorithm} were not exposed outside of the trajectory generation subsystem. Things like the current path ($path$), the segment number being executed ($i_t$) and distance already traveled along that segment ($l_t$) were only fed back into \autoref{alg:trajectory_generation_algorithm}. This lack of information became a problem for the path planning system when it needed to replan around a dynamic (or otherwise unexpected) obstacle that invalidated the original path plan. In order to replan efficiently, the path planner needed to be aware of where along the previous path plan the trajectory generator was when it encountered the obstacle. Without that information, the path planner was unable to generate a new path plan that avoided the obstacle and was still smoothly blended with the segments of the original plan that were unaffected by the obstacle's presence. To provide the path planner with the information required, the trajectory generator output the $path$ it was currently using, the current segment being executed $i_t$ and the distance traveled along that segment $l_t$. With this information, the path planner could easily extrapolate exactly where the trajectory generator had commanded the robot before detecting the collision and efficiently modify the path to avoid that collision. On HARLIE, this feedback mechanism was implemented using the ROS ``actionlib'' \todo{add ref to actionlib docs} library.
+
 \subsection{Collision Detection}\label{subsec:trajectory_generation_costmap3d}
+
+
 
 \begin{comment}
 
