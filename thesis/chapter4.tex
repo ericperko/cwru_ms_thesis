@@ -263,9 +263,11 @@ In the original design of the trajectory generator, the outputs of \autoref{alg:
 
 \subsection{Collision Detection}\label{subsec:trajectory_generation_costmap3d}
 
+\todo{add some figures for costmap3d!}
+
 In order to do precise navigation in complex, dynamic environments it is not simply enough to precisely follow a planned path -- the system must also avoid collisions with objects in the environment. The first step to avoid a collision is detecting that it is going to occur. There were two different methods for collision detection used in this trajectory generation subsystem: one based on existing ROS obstacle mapping and the other based on an octree representation of the environment. The original collision detection system used functionality based on the ROS ``costmap\_2d'' described in \autoref{subsec:costmap_2d}. This method suffered from many of the drawbacks described in \autoref{subsec:costmap_2d}, specifically the difficulty of maintaining a high resolution obstacle map in an efficient manner. The collision detection system itself was also difficult to use for checking the collision of a single pose efficiently; since the functionaltiy was originally part of the ROS ``base\_local\_planner'' (see \autoref{subsec:base_local_planner}), it was designed for checking a set of controls from the current robot pose and not a given state that was part of a path segment. It also did not have support for forward simulating, while checking for collisions, a desired state along one of the path segments used in this thesis, but could only forward simulate a set of constant velocity commands (translational and rotational).
 
-
+To address these shortcomings in the existing ROS obstacle mapping, a new obstacle mapping component was developed.
 
 \begin{comment}
 
