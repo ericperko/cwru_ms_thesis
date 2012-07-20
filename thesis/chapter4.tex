@@ -91,7 +91,7 @@ There are a number of algorithms used in \autoref{alg:trajectory_generation_algo
 
 \SetKwFunction{Length}{Length}
 
-The other three algorithms used in \autoref{alg:trajectory_generation_algorithm} are more complicated and require more detailed explanation. In all of these algortihms, \Length is a simple function that returns the number of path segments in the $path$ it is given. All of this is based on zero-indexed sequences (such as arrays in C) as opposed to one-indexed containers such as those found in Matlab.
+The other three algorithms used in \autoref{alg:trajectory_generation_algorithm} are more complicated and require more detailed explanation. In all of these algortihms, \Length is a simple function that returns the number of path segments in the $path$ it is given. These algorithms are based on zero-indexed sequences (such as arrays in C) as opposed to one-indexed containers such as those found in Matlab.
 
 \begin{algorithm}
 \caption{Update Segment Number and Distance Algorithm}
@@ -137,12 +137,13 @@ $\hat l$ = $path\left[i_t\right].segment\_length$ \; \nllabel{update_seg_num_seg
 	$l_t$ = $\hat l$ \;
 }
 
-
 \end{algorithm}
 
+\autoref{alg:update_seg_num_and_dist_algorithm} is the \UpdateSegmentNumberAndDistance function used in \autoref{alg:trajectory_generation_algorithm}. Its inputs are the current robot state ($robot\_state_t$), the current path ($path$), the last segment number being executed ($i_{t-1}$), the distance traveled along that segment already ($l_{t-1}$) and the last desired state ($state_{t-1}$). \autoref{alg:update_seg_num_and_dist_algorithm} then updates the distance traveled along the current segment according to the velocity in $state_{t-1}$ while moving to the next segment when appropriate and not running past the end of the $path$. It then outputs these new values for the segment number being executed ($i_t$) and distance already traveled along that segment ($l_t$) for consumption by the remainder of \autoref{alg:trajectory_generation_algorithm}.
+
+Two important details of this computation are on \autoref{update_seg_num_project_onto_des_tangent_vec} and \autoref{update_seg_num_seg_num_may_have_changed} of \autoref{alg:update_seg_num_and_dist_algorithm}. \autoref{update_seg_num_project_onto_des_tangent_vec} projects the robot's motion onto the the tangent vector of the last state. This prevents situations where the robot is moving nearly orthogonal to the desired state's tangent vector from advancing the distance traveled along the path segment too far for the actual distance along the path segment traveled. These situations can occur while using \emph{phase space steering} if there is a large lateral offset from the path -- \emph{phase space steering} is designed to move nearly orthogonal to the desired state's tangent vector in that situation. \autoref{update_seg_num_seg_num_may_have_changed} is required to ensure that the correct segment current segment and segment length is selected, even after all of the adjustments to the current segment number ($i_t$) have been made.
 
 
-\todo{UpdateSegNumAndDist algorithm/description}
 \todo{ComputeVelocityCommand algorithm/description}
 \todo{ComputeDesiredPose algorithm/description}
 
