@@ -43,7 +43,8 @@ As discussed in \autoref{subsec:steering_state}, the spin-in-place segment type 
 
 \subsection{Trajectory Generation Algorithm}\label{subsec:trajectory_generation_algorithm}
 
-The trajectory generation algorithm used in this thesis is detailed in this section. On HARLIE, this loop ran at 20 Hz to regularly send commands to the steering algorithms detailed in \autoref{subsec:steering_algorithms}. Note that the trajectory generator and steering algorithm, while both run at 20 Hz, they are not explicitly synchronized.
+The trajectory generation algorithm used in this thesis is detailed in this section. On HARLIE, this loop ran at 20 Hz to regularly send commands to the steering algorithms detailed in \autoref{subsec:steering_algorithms}. Note that the trajectory generator and steering algorithm, while both run at 20 Hz, they are not explicitly synchronized. It should also be noted that, while many of these concepts are not limited to SE(2) space (position and rotation on the XY plane), these algoritms are written assuming SE(2) space and not a more generalized six degree of freedom system (SE(3) space). \todo{add some references about SE(2) and SE(3) space}
+
 \todo{Better access to the struct things when they are like $state_t.velocity$}
 \todo{Use $\leftarrow$ or = for assignment of variables in algorithms?}
 
@@ -196,7 +197,65 @@ $rem$ = $path\left[i_t\right].segment\_length - l_t$ \;
 
 \autoref{alg:compute_velocity_command_algorithm} is the \ComputeVelocityCommand function used in \autoref{alg:trajectory_generation_algorithm}. Its inputs are the current path ($path$), the segment number being executed ($i_t$) and distance already traveled along that segment ($l_t$), as output by \autoref{alg:update_seg_num_and_dist_algorithm}. Its only output is the desired velocity command ($v_t$). \autoref{alg:compute_velocity_command_algorithm} has three steps. First, the algorithm initializes to the max speed for the current segment ($v_t$) and determines the max speed of the next segment ($v_{t+1}$). Next, it determines whether it can continue accelerating or needs to start braking in order to slow down to $v_{t+1}$ before the beginning of the next segment. Finally, the calculated velocity command $v_t$ is clamped to fall within the interval defined by the current segment's minimum and maximum speeds. After clamping, $v_t$ calculation is complete.
 
-\todo{ComputeDesiredPose algorithm/description}
+\begin{algorithm}
+\caption{Compute Desired Pose Algorithm}
+\label{alg:compute_desired_pose_algorithm}
+\DontPrintSemicolon
+
+\KwIn{$path$, $i_t$, $l_t$}
+\KwOut{$pose_t$}
+
+$\Psi$  = $path\left[i_t\right].init\_tan\_angle$ \;
+\Switch{$path\left[i_t\right].segment_type$}
+{
+	\Case{straight line segment}
+	{
+		$pose_t.position$ = $path\left[i_t\right].reference\_point + l_t \cdot 
+			\begin{bmatrix}
+				\cos \Psi \\
+				\sin \Psi \\
+			\end{bmatrix} $ \;
+		$pose_t.orientation$  = $\Psi$ \;
+	}
+	\Case{constant curvature arc segment}
+	{
+		$\rho$ = $path\left[i_t\right].curvature$ \;
+		$r$ = $\frac{1}{ | \rho | }$ \;
+		\eIf{$\rho \geq 0.0$}
+		{
+			$\hat\Psi$ = $\Psi - \frac{\pi}{2}$ \;
+		}
+		{
+			$\hat\Psi$ = $\Psi + \frac{\pi}{2}$ \;
+		}
+		$\delta\Psi$ = $l_t \cdot \rho$ \;
+		$pose_t.position$ = $path\left[i_t\right].reference\_point + r \cdot 
+			\begin{bmatrix}
+				\cos\left( \hat\Psi + \delta\Psi \right) \\
+				\sin\left( \hat\Psi + \delta\Psi \right) \\
+			\end{bmatrix} $ \;
+		$pose_t.orientation$  = $\Psi + \delta\Psi$ \;
+	}
+	\Case{spin-in-place segment}
+	{
+		$\rho$ = $path\left[i_t\right].curvature$ \;
+		\eIf{$\rho \geq 0.0$}
+		{
+			$\hat\Psi$ = $\Psi - \frac{\pi}{2}$ \;
+		}
+		{
+			$\hat\Psi$ = $\Psi + \frac{\pi}{2}$ \;
+		}
+		$\delta\Psi$ = $l_t \cdot \rho$ \;
+		$pose_t.position$ = $path\left[i_t\right].reference\_point$ \;
+		$pose_t.orientation$  = $\Psi + \delta\Psi$ \;
+	}
+}
+
+\end{algorithm}
+
+\autoref{alg:compute_desired_pose_algorithm} is the \ComputeDesiredPose function used in \autoref{alg:trajectory_generation_algorithm}. Its inputs are the current path ($path$), the segment number being executed ($i_t$) and distance already traveled along that segment ($l_t$), as output by \autoref{alg:update_seg_num_and_dist_algorithm}. Its only output is the desired pose ($pose_t$). \autoref{alg:compute_desired_pose_algorithm} is made up of three cases, depending on what type of path segment the pose is being computed from. For a straight line segment, \autoref{alg:compute_desired_pose_algorithm} moves the reference point in the direction of the tangent vector (as defined by the path segment's initial tangent angle and sets the orientation to face along that tangent vector. For a constant curvature arc segment, it must find the correct point along the circle $\frac{1}{ | \rho | }$ away from the segment's reference point as well as compute the correct tangent angle for that point on the circle. For a spin-in-place segment, it only needs to set the desired pose's orientation according to how far along the segment the trajectory generator is; because it is a spin-in-place, the desired position is the same as the segment's reference point.
+
 
 \subsection{Adding Feedback for Planning}\label{subsec:trajectory_generation_actionlib}
 
