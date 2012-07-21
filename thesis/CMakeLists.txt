@@ -10,7 +10,6 @@ set(LATEX_CHAPTER_SOURCES
 	chapter4.tex
 	chapter5.tex
 	chapter6.tex
-	chapter7.tex
 	introduction.tex
 	conclusion.tex
 	future_work.tex
