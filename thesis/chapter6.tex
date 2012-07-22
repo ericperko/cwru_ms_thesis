@@ -34,7 +34,25 @@ The results for both of these tests show that the precision navigation described
 
 \subsection{Phase Space Steering Initial Condition Tests}\label{subsec:phase_space_steering_skills}
 
-Another set of tests was conducted to gather information about the attraction region of the phase space steering algorithm (see \autoref{subsubsec:phase_space_steering}) as well as gather quantitative data on the acceptable initial conditions for the path planner (see \autoref{sec:path_planning}).
+Another set of tests was conducted to gather information about the attraction region of the phase space steering algorithm (see \autoref{subsubsec:phase_space_steering}) as well as gather quantitative data on the acceptable initial conditions for the path planner (see \autoref{sec:path_planning}). Two different tests were conducted: the ``door'' test (see \autoref{subsubsec:door_test}) and the ``tangent'' test (see \autoref{subsubsec:tangent_test}). Note that all of the results of these tests depend on the gains and other parameters, as well as steering algorithm used. For these tests, phase space steering was selected as the steering algorithm, with the following gains and parameters (as described in \autoref{subsubsec:phase_space_steering}: $k_v = 0.1$, $k_\Psi = 1.0$ and the slope of the phase space mapping function $s = -1.0$.
+
+\subsubsection{``Door'' Test}\label{subsubsec:door_test}
+
+The ``door'' test is designed to ask: Given a set of initial conditions (lateral offset and heading error), will phase space steering converge onto the path before reaching the door? This test involved commanding a path composed of a single straight line segment, positioned and oriented such that the line passes through the center of a doorway, while positioning the robot such that it had different lateral offsets and heading offsets to the path. These tests were conducted both in the Gazebo simulation environment described in \autoref{subsec:simulation_setup} and a subset of those results were tested on HARLIE to verify that the simulation results transfered to the physical robot. Simulation results are shown in \autoref{fig:door_skill_sim_results}.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.95\textwidth]{images/acceptable_error_surface}
+\caption{``Door'' Test Simulation Results \label{fig:door_skill_sim_results}}{The X-axis is the Initial Heading Error (rads), the Y-axis is the Initial Lateral Offset Error (m) and the Z-axis is the Tangential Distance to Path Convergence (m)}
+\end{figure}
+
+There are a number of useful results shown in \autoref{fig:door_skill_sim_results}. The first is that the performance of the phase space steering algorithm is symmetric about the Z-axis. This makes sense for HARLIE, as a negative heading error and positive lateral offset will have the robot already facing towards the path and a positive heading error and negative lateral offset will also have the robot facing towards the path. Any situation where the robot's initial conditions have it facing the path is much easier for the steering algorithm to converge onto the path in less distance along the path than a situation where the robot's initial conditions have it facing away from the path.
+
+A second result from the simulation experiments is the actual shape of the experimental data. This shape implies that the way to converge to the path with the least distance traveled along the path is to face the path as quickly as possible before beginning to move fowards. Logically, this makes sense -- moving forwards directly towards the path will converge more quickly than moving forwards at an angle towards the path. Essentially, the way to converge to the path with the least tangential distance traveled is to follow the gradient of this surface at whichever lateral offset and heading error the algorithm has -- which is exactly what the phase space steering algorithm is designed to do.
+
+\subsubsection{``Tangent'' Test}\label{subsubsec:tangent_test}
+
+The ``tangent'' test is designed to ask: Given a set of initial conditions (lateral offset and heading error), will phase space steering converge onto the path and reach the desired end pose without overshooting? Overshooting, in this case, is defined as the robot going more than four centimeters to the other side of the desired path (this approximates a task where the robot has been commanded to pull up very closely to a wall without hitting the wall).
 
 \subsection{Splicing Tests}\label{subsec:splicing_tests}
 
