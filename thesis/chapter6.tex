@@ -17,7 +17,8 @@ To generate the path following performance measurements, five independent runs o
 \begin{figure}
 \centering
 \includegraphics[width=0.95\textwidth]{images/l_path_autonomous_error}
-\caption{Precision Navigation Error on the L Path \label{fig:l_path_autonomous_error}}{The X-axis is meters traveled and the Y-axis is meters of lateral offset}
+\caption[Precision Navigation Error on the L Path]{Precision Navigation Error on the L Path. The X-axis is meters traveled and the Y-axis is meters of lateral offset}
+\label{fig:l_path_autonomous_error}
 \end{figure}
 
 Performance was measured in terms of RMS lateral offsets from the defined path. \autoref{fig:l_path_autonomous_error} shows the performance of autonomous runs of the precision navigation system on the L path. As can be seen, the path following errors were small and highly repeatable. Lateral errors were just over three centimeters RMS, and this result was repeatable with a standard deviation of less than four millimeters.
@@ -25,7 +26,8 @@ Performance was measured in terms of RMS lateral offsets from the defined path. 
 \begin{figure}
 \centering
 \includegraphics[width=0.95\textwidth]{images/fig_8_autonomous_error}
-\caption{Precision Navigation Error on the Figure 8 Path \label{fig:fig_8_autonomous_error}}{The X-axis is meters traveled and the Y-axis is meters of lateral offset}
+\caption[Precision Navigation Error on the Figure 8 Path]{Precision Navigation Error on the Figure 8 Path. The X-axis is meters traveled and the Y-axis is meters of lateral offset}
+\label{fig:fig_8_autonomous_error}
 \end{figure}
 
 The figure-8 test path had relatively tight turn radii (2ft), making it a more challenging path. Again, performance was measured in terms of RMS lateral offsets from the defined path. \autoref{fig:fig_8_autonomous_error} shows the performance of autonomous runs of the precision navigation system on the figure-8 path. As can be seen, the path following errors were small and highly repeatable. Lateral errors were less than five centimeters RMS, and this result was repeatable with a standard deviation of less than two centimeters.
@@ -43,12 +45,26 @@ The ``door'' test is designed to ask: Given a set of initial conditions (lateral
 \begin{figure}
 \centering
 \includegraphics[width=0.95\textwidth]{images/acceptable_error_surface}
-\caption{``Door'' Test Simulation Results \label{fig:door_skill_sim_results}}{The X-axis is the Initial Heading Error (rads), the Y-axis is the Initial Lateral Offset Error (m) and the Z-axis is the Tangential Distance to Path Convergence (m)}
+\caption[``Door'' Test Simulation Results]{``Door'' Test Simulation Results. The X-axis is the Initial Heading Error (rads), the Y-axis is the Initial Lateral Offset Error (m) and the Z-axis is the Tangential Distance to Path Convergence (m)}
+\label{fig:door_skill_sim_results}
 \end{figure}
 
 There are a number of useful results shown in \autoref{fig:door_skill_sim_results}. The first is that the performance of the phase space steering algorithm is symmetric about the Z-axis. This makes sense for HARLIE, as a negative heading error and positive lateral offset will have the robot already facing towards the path and a positive heading error and negative lateral offset will also have the robot facing towards the path. Any situation where the robot's initial conditions have it facing the path is much easier for the steering algorithm to converge onto the path in less distance along the path than a situation where the robot's initial conditions have it facing away from the path.
 
 A second result from the simulation experiments is the actual shape of the experimental data. This shape implies that the way to converge to the path with the least distance traveled along the path is to face the path as quickly as possible before beginning to move fowards. Logically, this makes sense -- moving forwards directly towards the path will converge more quickly than moving forwards at an angle towards the path. Essentially, the way to converge to the path with the least tangential distance traveled is to follow the gradient of this surface at whichever lateral offset and heading error the algorithm has -- which is exactly what the phase space steering algorithm is designed to do.
+
+This experiment also yielded information as to the minimum tangential distance required to converge to the path, given a set of initial conditions. This data can be used to determine whether, given a set of initial conditions and a doorway that must be traversed, a path planner must replan from the initial conditions to the path or if no replanning is required because there is enough distance before the door to converge to the path before reaching the door. For example, the data collected in simulation implies that, given a lateral offset of twenty-five centimeters and an initial heading error of fourty-five degrees, the robot must be at least thirty-one centimeters away perpendicularly from the doorway in order to safely pass through the doorway. A number of runs were conducted with HARLIE to validate these results; these tests with the physical system confirmed the simulation results. See \autoref{fig:door_skill_harlie_results} for some examples of HARLIE while conducting these tests.  There are two different initial conditions shown (see \autoref{fig:door_skill_harlie_results_initial_a} and \autoref{fig:door_skill_harlie_results_initial_b}), as well as HARLIE clearing the doorway (see \autoref{fig:door_skill_harlie_results_clearing_doorway}).
+
+\begin{figure}
+\centering
+\subfloat[Initial Condition A]{\includegraphics[width=0.49\textwidth]{images/door_skill_harlie_initial_a}\label{fig:door_skill_harlie_results_initial_a}}
+\hfill
+\subfloat[Initial Condition B]{\includegraphics[width=0.49\textwidth]{images/door_skill_harlie_initial_b}\label{fig:door_skill_harlie_results_initial_b}}
+\\
+\subfloat[Clearing Doorway]{\includegraphics[width=0.75\textwidth]{images/door_skill_harlie_clearing_doorway}\label{fig:door_skill_harlie_results_clearing_doorway}}
+\caption[``Door'' Test HARLIE Results]{``Door'' Test HARLIE Results. These are images captured from videos taken during the tests. The desired path runs through the middle of the door, perpendicular to the doorway.}
+\label{fig:door_skill_harlie_results}
+\end{figure}
 
 \subsubsection{``Tangent'' Test}\label{subsubsec:tangent_test}
 
