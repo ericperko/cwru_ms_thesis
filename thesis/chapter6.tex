@@ -49,7 +49,7 @@ The ``door'' test is designed to ask: Given a set of initial conditions (lateral
 \label{fig:door_skill_sim_results}
 \end{figure}
 
-There are a number of useful results shown in \autoref{fig:door_skill_sim_results}. The first is that the performance of the phase space steering algorithm is symmetric about the Z-axis. This makes sense for HARLIE, as a negative heading error and positive lateral offset will have the robot already facing towards the path and a positive heading error and negative lateral offset will also have the robot facing towards the path. Any situation where the robot's initial conditions have it facing the path is much easier for the steering algorithm to converge onto the path in less distance along the path than a situation where the robot's initial conditions have it facing away from the path.
+There are a number of useful results shown in \autoref{fig:door_skill_sim_results}. The first is that the performance of the phase space steering algorithm is symmetric about the XZ-plane. This makes sense for HARLIE, as a negative heading error and positive lateral offset will have the robot already facing towards the path and a positive heading error and negative lateral offset will also have the robot facing towards the path. Any situation where the robot's initial conditions have it facing the path is much easier for the steering algorithm to converge onto the path in less distance along the path than a situation where the robot's initial conditions have it facing away from the path.
 
 A second result from the simulation experiments is the actual shape of the experimental data. This shape implies that the way to converge to the path with the least distance traveled along the path is to face the path as quickly as possible before beginning to move fowards. Logically, this makes sense -- moving forwards directly towards the path will converge more quickly than moving forwards at an angle towards the path. Essentially, the way to converge to the path with the least tangential distance traveled is to follow the gradient of this surface at whichever lateral offset and heading error the algorithm has -- which is exactly what the phase space steering algorithm is designed to do.
 
@@ -68,7 +68,27 @@ This experiment also yielded information as to the minimum tangential distance r
 
 \subsubsection{``Tangent'' Test}\label{subsubsec:tangent_test}
 
-The ``tangent'' test is designed to ask: Given a set of initial conditions (lateral offset and heading error), will phase space steering converge onto the path and reach the desired end pose without overshooting? Overshooting, in this case, is defined as the robot going more than four centimeters to the other side of the desired path (this approximates a task where the robot has been commanded to pull up very closely to a wall without hitting the wall).
+The ``tangent'' test is designed to ask: Given a set of initial conditions (lateral offset and heading error), will phase space steering converge onto the path and reach the desired end pose without overshooting? Overshooting, in this case, is defined as the robot going more than four centimeters to the other side of the desired path (this approximates a task where the robot has been commanded to pull up very closely to a wall without hitting the wall). This test involved commanding a path composed of a single straight line segment, positioned and oriented such that the line is parallel and near to a wall, while positioning the robot such that it had different lateral offsets and heading offsets to the path. These tests were conducted both in the Gazebo simulation environment described in \autoref{subsec:simulation_setup} and a subset of those results were tested on HARLIE to verify that the simulation results transfered to the physical robot. Simulation results are shown in \autoref{fig:tangent_skill_sim_results}, where a tangential distance of more than five meters means that no overshoot occurred before the end of the desired path.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.95\textwidth]{images/acceptable_overshoot_scatter}
+\caption[``Tangent'' Test Simulation Results]{``Tangent'' Test Simulation Results. The X-axis is the Initial Heading Error (rads), the Y-axis is the Initial Lateral Offset Error (m) and the Z-axis is the Tangential Distance before Overshoot (m).}
+\label{fig:tangent_skill_sim_results}
+\end{figure}
+
+\autoref{fig:tangent_skill_sim_results} shows a number of useful results. The first is that, just as with the ``door'' test results, the performance is symmetric about the XZ-plane. It also indicates that the likelihood of overshooting is greatly influenced by the the lateral offset from the path -- the less lateral offset the robot starts with, the more likely it is to overshoot the desired path while converging.
+
+This experiment also yielded information on the set of initial conditions that are acceptable for how far the robot can go without overshooting a given path. An example of such a path is a smart wheelchair pulling up next to a handicap door assist button. Similarly to the ``door'' test results, these results can be used to determine whether a path planner must replan a path from the robot's current position to the origin of the desired path or if the desired path can be commanded directly with no replanning. For example, the data collected in simulation implies that, given a lateral offset of one meter and an initial heading error of ninety degrees, overshooting will occur; in that situation, it would not be safe to directly command the desired path if the desired path required no overshooting. A number of runs were conducted with HARLIE to validate these results; these tests with the physical system confirmed the simulation results. See \autoref{fig:tangent_skill_harlie_results} for some examples of HARLIE while conducting these tests. One particular initial condition (see \autoref{fig:tangent_skill_harlie_results_initial}) as well as HARLIE successfully stopping parallel to a card reader that would unlock the door (see \autoref{fig:tangent_skill_harlie_results_approaching_reader}).
+
+\begin{figure}
+\centering
+\subfloat[Initial Condition]{\includegraphics[width=0.75\textwidth]{images/tangent_skill_harlie_initial}\label{fig:tangent_skill_harlie_results_initial}}
+\\
+\subfloat[Stopping Next to Card Reader]{\includegraphics[width=0.75\textwidth]{images/tangent_skill_harlie_approaching_reader}\label{fig:tangent_skill_harlie_results_approaching_reader}}
+\caption[``Tangent'' Test HARLIE Results]{``Tangent'' Test HARLIE Results. These are images captured from videos taken during the tests. The desired path runs parallel to the wall.}
+\label{fig:tangent_skill_harlie_results}
+\end{figure}
 
 \subsection{Splicing Tests}\label{subsec:splicing_tests}
 
