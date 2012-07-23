@@ -36,7 +36,7 @@ The results for both of these tests show that the precision navigation described
 
 \subsection{Phase Space Steering Initial Condition Tests}\label{subsec:phase_space_steering_skills}
 
-Another set of tests was conducted to gather information about the attraction region of the phase space steering algorithm (see \autoref{subsubsec:phase_space_steering}) as well as gather quantitative data on the acceptable initial conditions for the path planner (see \autoref{sec:path_planning}). Two different tests were conducted: the ``door'' test (see \autoref{subsubsec:door_test}) and the ``tangent'' test (see \autoref{subsubsec:tangent_test}). Note that all of the results of these tests depend on the gains and other parameters, as well as steering algorithm used. For these tests, phase space steering was selected as the steering algorithm, with the following gains and parameters (as described in \autoref{subsubsec:phase_space_steering}: $k_v = 0.1$, $k_\Psi = 1.0$ and the slope of the phase space mapping function $s = -1.0$.
+Another set of tests was conducted to gather information about the attraction region of the phase space steering algorithm (see \autoref{subsubsec:phase_space_steering}) as well as gather quantitative data on the acceptable initial conditions for the path planner (see \autoref{sec:path_planning}). Two different tests were conducted: the ``door'' test (see \autoref{subsubsec:door_test}) and the ``tangent'' test (see \autoref{subsubsec:tangent_test}). Note that all of the results of these tests depend on the gains and other parameters, as well as steering algorithm, used. For these tests, phase space steering was selected as the steering algorithm, with the following gains and parameters (as described in \autoref{subsubsec:phase_space_steering}: $k_v = 0.1$, $k_\Psi = 1.0$ and the slope of the phase space mapping function $s = -1.0$.
 
 \subsubsection{``Door'' Test}\label{subsubsec:door_test}
 
@@ -91,6 +91,26 @@ This experiment also yielded information on the set of initial conditions that a
 \end{figure}
 
 \subsection{Splicing Tests}\label{subsec:splicing_tests}
+
+Experiments were also conducted to validate the splicing method described in \autoref{sec:path_planning}. In this test, HARLIE was given a path where the first segment was a long straight line. This segment was then blocked with an orange construction barrel in order to force the planner to splice in a path around it. An example from one of these tests is in \autoref{fig:splicing_test_results}. \autoref{fig:splicing_test_results_pre_splice} shows HARLIE while waiting for the planner to splice a path around the barrel; the barrel is the semicircle in the laser scan and obstacle map immediately in front and to the right of HARLIE. \autoref{fig:splicing_test_results_after_splice} shows HARLIE after fifteen seconds of waiting for the barrel to move; the planner spliced in a sequence of segments as described in \autoref{sec:path_planning} and HARLIE began executing the newly spliced path segments. \autoref{fig:splicing_test_results_post_splice_segment} shows HARLIE after finishing the spliced segments and resuming the original path segment after successfully avoiding the barrel.
+
+While these experiments validated that the splicing method described in \autoref{sec:path_planning} worked in some cases, they also confirmed some of the limitations of that splicing method. For example, in the first experiment the one meter radius of the spliced in semicircle was insufficient. After HARLIE started executing the spliced in path, the path was still going to result in a collision with the barrel. In order for HARLIE to complete the path in that experiment, the barrel had to be moved away from the path. This result led to increasing the radius of the spliced in semicircle to two meters for the results shown in \autoref{fig:splicing_test_results}.
+
+\begin{figure}
+\centering
+\subfloat[HARLIE Stopped, Waiting for Obstacle to Move]{\includegraphics[width=0.75\textwidth]{images/splicing_test_pre_splice}\label{fig:splicing_test_results_pre_splice}}
+\\
+\subfloat[HARLIE Post-Splicing, On Spliced Arc]{\includegraphics[width=0.75\textwidth]{images/splicing_test_after_splice}\label{fig:splicing_test_results_after_splice}}
+\caption[Splicing Test Results Figures (a) and (b)]{Splicing Test Results  Figures (a) and (b).}
+\end{figure}
+
+\begin{figure}
+\centering
+\ContinuedFloat
+\subfloat[HARLIE Post-Splicing, Resuming Original Line Segment]{\includegraphics[width=0.75\textwidth]{images/splicing_test_post_splice_segment}\label{fig:splicing_test_results_post_splice_segment}}
+\caption[Splicing Test Results Figure (c)]{Splicing Test Results Figure (c). These are images captured from videos of the GUI taken during the tests. Teal line is the desired path, blue arrow is the current desired state, red is the obstacle data from ``costmap3d'', white is the current laser scan and the set of polygons is a model of HARLIE.}
+\label{fig:splicing_test_results}
+\end{figure}
 
 \begin{comment}
 
