@@ -35,7 +35,7 @@ Originally, only two segment types were used: line segments and constant curvatu
 
 \subsection{Steering Algorithms}\label{subsec:steering_algorithms}
 
-Two different steering algorithms were developed and evaluated for use in this precision navigation system. The first of these is an algorithm called \emph{second-order steering} (see \autoref{subsubsec:second_order_steering} \todo{fix the reference name to subsubsection}) and the second, developed to address deficiencies in the first, is called \emph{phase space steering} (see \autoref{subsubsec:phase_space_steering}). Both of these algorithms have the same form, as laid out in \autoref{alg:generic_steering_algorithm}.
+Two different steering algorithms were developed and evaluated for use in this precision navigation system. The first of these is an algorithm called \emph{second-order steering} (see \autoref{subsubsec:second_order_steering}) and the second, developed to address deficiencies in the first, is called \emph{phase space steering} (see \autoref{subsubsec:phase_space_steering}). Both of these algorithms have the same form, as laid out in \autoref{alg:generic_steering_algorithm}.
 
 \begin{algorithm}
 \caption{Generic Steering Algorithm}
@@ -58,7 +58,7 @@ v = v_{des} + k_v \cdot Lfollow
 \label{eq:steering_v_lfollow}
 \end{equation}
 
-In \eqref{eq:steering_v_lfollow}, $v$ is the output desired velocity, $v_{des}$ is the desired velocity according to the input desired robot state and $k_v$ is a tunable gain constant. $Lfollow$ is the error between the robot's state and the desired state along the desired path. $Lfollow$ represents how far in front or behind the robot is from the desired state and, accordingly, modifies the desired velocity to correct this error along the desired path. For example, if the robot has fallen ``behind'' the desired state, the output velocity is increased such that it can reduce the tangential error (and hence $Lfollow$ term). See \autoref{subsec:lfollow_discussion_steering} \todo{fix subsection naming} for more discussion of the $Lfollow$ term.
+In \eqref{eq:steering_v_lfollow}, $v$ is the output desired velocity, $v_{des}$ is the desired velocity according to the input desired robot state and $k_v$ is a tunable gain constant. $Lfollow$ is the error between the robot's state and the desired state along the desired path. $Lfollow$ represents how far in front or behind the robot is from the desired state and, accordingly, modifies the desired velocity to correct this error along the desired path. For example, if the robot has fallen ``behind'' the desired state, the output velocity is increased such that it can reduce the tangential error (and hence $Lfollow$ term). See \autoref{subsec:lfollow_discussion_steering} for more discussion of the $Lfollow$ term.
 
 \subsubsection{Second-Order Steering}\label{subsubsec:second_order_steering}
 
