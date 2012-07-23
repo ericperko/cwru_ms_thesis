@@ -18,30 +18,48 @@
 \bibliography{bibliography}
 
 \newcommand{\subfigureautorefname}{\figureautorefname}
+\renewcommand{\contentsname}{Table of Contents}
+\def\subsectionautorefname{section}
+\def\subsubsectionautorefname{section}
 
-\author{Eric M. Perko}
+\author{Eric Michael Perko}
 \title{Precision Navigation for Indoor Mobile Robots}
 
 \begin{document}
 \SetAlgorithmName{Algorithm}{Algorithm}{List of Algorithms}
 \doublespacing
 
-\maketitle
+\include{title}
+\newpage
 
+\setcounter{page}{1}
+\pagenumbering{roman}
 \tableofcontents
 \newpage
 
-\listoffigures
-\newpage
-
-\listofalgorithms
-\newpage
-
+\phantomsection
+\addcontentsline{toc}{section}{List of Tables}
 \listoftables
 \newpage
 
+\phantomsection
+\addcontentsline{toc}{section}{List of Figures}
+\listoffigures
+\newpage
+
+\phantomsection
+\addcontentsline{toc}{section}{List of Algorithms}
+\listofalgorithms
+\newpage
+
+\phantomsection
+\addcontentsline{toc}{section}{Acknowledgements}
+\include{acknowledgements}
+
 \include{abstract}
 
+\setcounter{page}{1}
+\pagenumbering{arabic}
 \include{introduction}
 
 \include{chapter0}

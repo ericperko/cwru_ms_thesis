@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 2.8.0)
 project(Thesis NONE)
 
 set(LATEX_CHAPTER_SOURCES
+	title.tex
+	acknowledgements.tex
 	abstract.tex
 	chapter0.tex
 	chapter1.tex
