@@ -45,7 +45,6 @@ As discussed in \autoref{subsec:steering_state}, the spin-in-place segment type 
 
 The trajectory generation algorithm used in this thesis is detailed in this section. On HARLIE, this loop ran at 20 Hz to regularly send commands to the steering algorithms detailed in \autoref{subsec:steering_algorithms}. Note that the trajectory generator and steering algorithm, while both run at 20 Hz, they are not explicitly synchronized. It should also be noted that, while many of these concepts are not limited to SE(2) space (position and rotation on the XY plane), these algoritms are written assuming SE(2) space and not a more generalized six degree of freedom system (SE(3) space).
 
-\todo{Better access to the struct things when they are like $state_t.velocity$}
 \todo{Use $\leftarrow$ or = for assignment of variables in algorithms?}
 \todo{add figure of the different path segments with labels for the geometric primitive bits and the desired state output}
 
