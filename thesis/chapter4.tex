@@ -37,33 +37,13 @@ The path segment used by the trajectory generator developed for this thesis is d
 	\caption{Path Segment Field Description \label{table:path_segment_description}}
 \end{table}
 
-\begin{figure}
-\centering
-\subfloat[Constant Curvature Arc]{\includegraphics[width=0.75\textwidth]{images/arc_geometry_with_labels}\label{fig:constant_curvature_arc_geometry}}
-\\
-\subfloat[Straight Line]{\includegraphics[height=0.35\textheight]{images/line_geometry_with_labels}\label{fig:straight_line_geometry}}
-\caption[Labeled Path Segment Geometries Figures (a) and (b)]{Labeled Path Segment Geometries Figures (a) and (b)}
-\end{figure}
-
-\begin{figure}
-\centering
-\ContinuedFloat
-\subfloat[Spin-in-Place]{\includegraphics[width=0.55\textwidth]{images/spin_in_place_geometry_with_labels}\label{fig:spin_in_place_geometry}}
-\caption[Labeled Path Segment Geometries Figure (c)]{Labeled Path Segment Geometries Figure (c).}
-\label{fig:labeled_path_segment_geometry}
-\end{figure}
-
 Of the fields listed in \autoref{table:path_segment_description}, the ones requiring the most explanation are the \emph{reference\_point} and the \emph{initial\_tangent\_angle}. The \emph{reference\_point} can have the following meanings, depending on \emph{segment\_type}. For a straight line segment, the reference point is the start point of the line segment. For a constant curvature arc, the reference point is the center of the circle that the arc belongs to (the radius of that circle is $1/curvature$). For a spin-in-place segment, the reference point is the point about which to spin. The \emph{initial\_tangent\_angle} can have the following means, depending on \emph{segment\_type}. For a straight line segment, the initial tangent angle is the direction of the line segment. For a constant curvature arc, the initial tangent angle defines the actual point along the circle where the the arc segment begins. For a spin-in-place segment, the initial tangent angle is angle that the spin should start from. 
-
-See \autoref{fig:labeled_path_segment_geometry} for the geometric relationship between the fields listed in \autoref{table:path_segment_description} for each segment type. For all of these figures, red denotes features that are described by the path segment while black features indicate features that are based on the current trajectory generator state. For example, in \autoref{fig:constant_curvature_arc_geometry}, the red line, labeled \textbf{r}, between the reference point and the desired pose represents the radius of the arc (or $1/curvature$) while the shorter black arc, labeled \textbf{l}, represents the trajectory generator's current distance along the path segment and is what the labeled \textbf{desired\_pose} is based on.
 
 As discussed in \autoref{subsec:steering_state}, the spin-in-place segment type was added to the original path segment types to avoid numerical instability issues when using arcs with very small radii.
 
 \subsection{Trajectory Generation Algorithm}\label{subsec:trajectory_generation_algorithm}
 
 The trajectory generation algorithm used in this thesis is detailed in this section. On HARLIE, this loop ran at 20 Hz to regularly send commands to the steering algorithms detailed in \autoref{subsec:steering_algorithms}. Note that the trajectory generator and steering algorithm, while both run at 20 Hz, they are not explicitly synchronized. It should also be noted that, while many of these concepts are not limited to SE(2) space (position and rotation on the XY plane), these algoritms are written assuming SE(2) space and not a more generalized six degree of freedom system (SE(3) space).
-
-\todo{add figure of the different path segments with labels for the geometric primitive bits and the desired state output}
 
 \begin{algorithm}
 \caption{Trajectory Generation Algorithm}
@@ -272,6 +252,24 @@ $\Psi$  = $path\left[i_t\right].init\_tan\_angle$ \;
 \end{algorithm}
 
 \autoref{alg:compute_desired_pose_algorithm} is the \ComputeDesiredPose function used in \autoref{alg:trajectory_generation_algorithm}. Its inputs are the current path ($path$), the segment number being executed ($i_t$) and distance already traveled along that segment ($l_t$), as output by \autoref{alg:update_seg_num_and_dist_algorithm}. Its only output is the desired pose ($pose_t$). \autoref{alg:compute_desired_pose_algorithm} is made up of three cases, depending on what type of path segment the pose is being computed from. For a straight line segment, \autoref{alg:compute_desired_pose_algorithm} moves the reference point in the direction of the tangent vector (as defined by the path segment's initial tangent angle and sets the orientation to face along that tangent vector. For a constant curvature arc segment, it must find the correct point along the circle $\frac{1}{ | \rho | }$ away from the segment's reference point as well as compute the correct tangent angle for that point on the circle. For a spin-in-place segment, it only needs to set the desired pose's orientation according to how far along the segment the trajectory generator is; because it is a spin-in-place, the desired position is the same as the segment's reference point.
+
+\begin{figure}
+\centering
+\subfloat[Constant Curvature Arc]{\includegraphics[width=0.75\textwidth]{images/arc_geometry_with_labels}\label{fig:constant_curvature_arc_geometry}}
+\\
+\subfloat[Straight Line]{\includegraphics[height=0.35\textheight]{images/line_geometry_with_labels}\label{fig:straight_line_geometry}}
+\caption[Labeled Path Segment Geometries Figures (a) and (b)]{Labeled Path Segment Geometries Figures (a) and (b)}
+\end{figure}
+
+\begin{figure}
+\centering
+\ContinuedFloat
+\subfloat[Spin-in-Place]{\includegraphics[width=0.55\textwidth]{images/spin_in_place_geometry_with_labels}\label{fig:spin_in_place_geometry}}
+\caption[Labeled Path Segment Geometries Figure (c)]{Labeled Path Segment Geometries Figure (c).}
+\label{fig:labeled_path_segment_geometry}
+\end{figure}
+
+See \autoref{fig:labeled_path_segment_geometry} for the geometric relationships between the fields listed in \autoref{table:path_segment_description} for each segment type; these geometric relationships are what \autoref{alg:compute_desired_pose_algorithm} is based on. For all of these figures, red denotes features that are described by the path segment while black features indicate features that are based on the current trajectory generator state. For example, in \autoref{fig:constant_curvature_arc_geometry}, the red line, labeled \textbf{r}, between the reference point and the desired pose represents the radius of the arc (or $1/curvature$) while the shorter black arc, labeled \textbf{l}, represents the trajectory generator's current distance along the path segment ($l_t$) and is what the labeled \textbf{desired\_pose} ($pose_t$) is calculated from.
 
 \subsection{Adding Feedback for Planning}\label{subsec:trajectory_generation_actionlib}
 
