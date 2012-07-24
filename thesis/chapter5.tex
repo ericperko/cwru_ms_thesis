@@ -1,6 +1,6 @@
 \section{Path Planning}\label{sec:path_planning}
 
-The third major component of the path exeuction subsystem is a path planner. This component sits above the trajectory generation component and takes goals from other robot subsystems and outputs paths that the precision navigation system should follow. The path planner fills a similar role to that of the ``navfn'' described in \autoref{subsec:navfn}. The output is an ordered sequence of path segments (see \autoref{subsec:path_segment} for detailed description of a path segment) that must be blended smoothly such that there are no discontinuities in position or orientation between the end of one segment and the beginning of the next segment.
+The third major component of the path execution subsystem is a path planner. This component sits above the trajectory generation component and takes goals from other robot subsystems and outputs paths that the precision navigation system should follow. The path planner fills a similar role to that of the ``navfn'' described in \autoref{subsec:navfn}. The output is an ordered sequence of path segments (see \autoref{subsec:path_segment} for detailed description of a path segment) that must be blended smoothly such that there are no discontinuities in position or orientation between the end of one segment and the beginning of the next segment.
 
 \begin{figure}
 \centering
@@ -17,7 +17,7 @@ The next set of assumptions is related to the initial conditions of the robot wh
 Even with these limitations, the path planner developed for this thesis was sufficient for precisely navigating in static indoor environments. In order to validate that dynamic replanning around obstacles was possible within the framework of the precision navigation system, the path planner was extended with the ability to ``splice'' in a sequence of path segments to go around the dynamic obstacle encountered. The splicing, which takes place whenever an imminent collision is detected by the trajectory generation, is made up of the following steps:
 
 \begin{enumerate}
-\item Wait for $n$ seconds, aborting splicing if there will no longer be a collison (e.g. if a person was simply walking across the robot's path)
+\item Wait for $n$ seconds, aborting splicing if there will no longer be a collision (e.g. if a person was simply walking across the robot's path)
 \item Confirm the desired state (with forward simulation along the path segment) will still cause a collision
 \item Shorten the current path segment to end at the current desired state
 \item Add the following path segments to the path between the shortened current path segment and the next segment of the original path

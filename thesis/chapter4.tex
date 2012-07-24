@@ -1,10 +1,10 @@
 \section{Trajectory Generation}\label{sec:trajectory_generation}\todo{Wyatt, any references for trajectory generation stuff that would be useful for this section?}
 
-Another major compenent of the path execution subsystem developed in this thesis is trajectory generation. This componenet sits between the steering and path planning components, taking global paths from path planning and outputting desired states that the steering component attempts to achieve. The trajectory generator fills the same role as the ``base\_local\_planner'' described in \autoref{subsec:base_local_planner}. The input to the trajectory generator is an ordered sequence of path segments (called a \emph{path}). The path segments are described in \autoref{subsec:path_segment}. The output is a desired state for the current timestep, as described in \autoref{subsec:steering_state}.
+Another major component of the path execution subsystem developed in this thesis is trajectory generation. This component sits between the steering and path planning components, taking global paths from path planning and outputting desired states that the steering component attempts to achieve. The trajectory generator fills the same role as the ``base\_local\_planner'' described in \autoref{subsec:base_local_planner}. The input to the trajectory generator is an ordered sequence of path segments (called a \emph{path}). The path segments are described in \autoref{subsec:path_segment}. The output is a desired state for the current timestep, as described in \autoref{subsec:steering_state}.
 
 \subsection{Path Segment Description}\label{subsec:path_segment}
 
-The path segment used by the trajectory generator developed for this thesis is described in \autoref{table:path_segment_description}. There are three different types of path segments used in this thesis -- straight lines, smooth constant curvature arcs and spin-in-places. One important assumption about these path segments is that, for a given sequence of segments, they will already be bleneded together to remove any discontinuities in the geometric parameterization between the end of a segment and the beginning of the following segment.
+The path segment used by the trajectory generator developed for this thesis is described in \autoref{table:path_segment_description}. There are three different types of path segments used in this thesis -- straight lines, smooth constant curvature arcs and spin-in-places. One important assumption about these path segments is that, for a given sequence of segments, they will already be blended together to remove any discontinuities in the geometric parameterization between the end of a segment and the beginning of the following segment.
 
 \begin{table}[htbp]
 	\begin{tabularx}{\textwidth}{|r|X|}
@@ -21,7 +21,7 @@ The path segment used by the trajectory generator developed for this thesis is d
 		\hline
 		reference\_point & The reference point for this path segment. Interpretation depends on the \emph{segment\_type} \\
 		\hline
-		initial\_tangent\_angle & The intial tangent angle for this segment. Interpretation depends on the \emph{segment\_type} \\
+		initial\_tangent\_angle & The initial tangent angle for this segment. Interpretation depends on the \emph{segment\_type} \\
 		\hline
 		curvature & The curvature of this segment. Exact interpretation depends on the \emph{segment\_type}. For straight lines curvature should be 0.0 \\
 		\hline
@@ -43,7 +43,7 @@ As discussed in \autoref{subsec:steering_state}, the spin-in-place segment type 
 
 \subsection{Trajectory Generation Algorithm}\label{subsec:trajectory_generation_algorithm}
 
-The trajectory generation algorithm used in this thesis is detailed in this section. On HARLIE, this loop ran at 20 Hz to regularly send commands to the steering algorithms detailed in \autoref{subsec:steering_algorithms}. Note that the trajectory generator and steering algorithm, while both run at 20 Hz, they are not explicitly synchronized. It should also be noted that, while many of these concepts are not limited to SE(2) space (position and rotation on the XY plane), these algoritms are written assuming SE(2) space and not a more generalized six degree of freedom system (SE(3) space).
+The trajectory generation algorithm used in this thesis is detailed in this section. On HARLIE, this loop ran at 20 Hz to regularly send commands to the steering algorithms detailed in \autoref{subsec:steering_algorithms}. Note that the trajectory generator and steering algorithm, while both run at 20 Hz, they are not explicitly synchronized. It should also be noted that, while many of these concepts are not limited to SE(2) space (position and rotation on the XY plane), these algorithms are written assuming SE(2) space and not a more generalized six degree of freedom system (SE(3) space).
 
 \begin{algorithm}
 \caption{Trajectory Generation Algorithm}
@@ -89,7 +89,7 @@ There are a number of algorithms used in \autoref{alg:trajectory_generation_algo
 
 \SetKwFunction{Length}{Length}
 
-The other three algorithms used in \autoref{alg:trajectory_generation_algorithm} are more complicated and require more detailed explanation. In all of these algortihms, \Length is a simple function that returns the number of path segments in the $path$ it is given. These algorithms are based on zero-indexed sequences (such as arrays in C) as opposed to one-indexed containers such as those found in Matlab. Also, in all of these algorithms, $dt$ is the time since the last loop ended (on HARLIE, $dt = \frac{1}{20 Hz}$).
+The other three algorithms used in \autoref{alg:trajectory_generation_algorithm} are more complicated and require more detailed explanation. In all of these algorithms, \Length is a simple function that returns the number of path segments in the $path$ it is given. These algorithms are based on zero-indexed sequences (such as arrays in C) as opposed to one-indexed containers such as those found in Matlab. Also, in all of these algorithms, $dt$ is the time since the last loop ended (on HARLIE, $dt = \frac{1}{20 Hz}$).
 
 \begin{algorithm}
 \caption{Update Segment Number and Distance Algorithm}
@@ -179,7 +179,7 @@ $rem$ = $path\left[i_t\right].segment\_length - l_t$ \;
 }
 \Else
 {
-	$v_t$ = $v_t + path\left[i_t\right].accel\_limit \cdot dt$ \;
+	$v_t$ = $v_t + path\left[i_t\right].acceleration\_limit \cdot dt$ \;
 }
 
 \eIf{$path\left[i_t\right]$ is a spin-in-place segment}
@@ -202,7 +202,7 @@ $rem$ = $path\left[i_t\right].segment\_length - l_t$ \;
 \KwIn{$path$, $i_t$, $l_t$}
 \KwOut{$pose_t$}
 
-$\Psi$  = $path\left[i_t\right].init\_tan\_angle$ \;
+$\Psi$  = $path\left[i_t\right].initial\_tangent\_angle$ \;
 \Switch{$path\left[i_t\right].segment_type$}
 {
 	\Case{straight line segment}
@@ -279,18 +279,18 @@ In the original design of the trajectory generator, the outputs of \autoref{alg:
 
 \begin{figure}
 \centering
-\subfloat[Side View, 20cm Resolution]{\includegraphics[width=0.75\textwidth]{images/3rd_floor_side_20cm}\label{fig:costmap3d_examples_side_view}}
+\subfloat[Side View, 20 cm Resolution]{\includegraphics[width=0.75\textwidth]{images/3rd_floor_side_20cm}\label{fig:costmap3d_examples_side_view}}
 \\
-\subfloat[Inside View, 2.5cm Resolution]{\includegraphics[width=0.75\textwidth]{images/3rd_floor_inside_2_5cm}\label{fig:costmap3d_examples_inside_view}}
+\subfloat[Inside View, 2.5 cm Resolution]{\includegraphics[width=0.75\textwidth]{images/3rd_floor_inside_2_5cm}\label{fig:costmap3d_examples_inside_view}}
 \caption[Costmap3D Examples]{Costmap3D Examples. These are from an OctoMap built from 3D sensor data of the Glennan 3rd Floor while using Costmap3D.}
 \label{fig:costmap3d_examples}
 \end{figure}
 
-In order to do precise navigation in complex, dynamic environments it is not simply enough to precisely follow a planned path -- the system must also avoid collisions with objects in the environment. The first step to avoid a collision is detecting that it is going to occur. There were two different methods for collision detection used in this trajectory generation subsystem: one based on existing ROS obstacle mapping and the other based on an octree representation of the environment. The original collision detection system used functionality based on the ROS ``costmap\_2d'' described in \autoref{subsec:costmap_2d}. This method suffered from many of the drawbacks described in \autoref{subsec:costmap_2d}, specifically the difficulty of maintaining a high resolution obstacle map in an efficient manner. The collision detection system itself was also difficult to use for checking the collision of a single pose efficiently; since the functionaltiy was originally part of the ROS ``base\_local\_planner'' (see \autoref{subsec:base_local_planner}), it was designed for checking a set of controls from the current robot pose and not a given state that was part of a path segment. It also did not have support for forward simulating, while checking for collisions, a desired state along one of the path segments used in this thesis, but could only forward simulate a set of constant velocity commands (translational and rotational).
+In order to do precise navigation in complex, dynamic environments it is not simply enough to precisely follow a planned path -- the system must also avoid collisions with objects in the environment. The first step to avoid a collision is detecting that it is going to occur. There were two different methods for collision detection used in this trajectory generation subsystem: one based on existing ROS obstacle mapping and the other based on an octree representation of the environment. The original collision detection system used functionality based on the ROS ``costmap\_2d'' described in \autoref{subsec:costmap_2d}. This method suffered from many of the drawbacks described in \autoref{subsec:costmap_2d}, specifically the difficulty of maintaining a high resolution obstacle map in an efficient manner. The collision detection system itself was also difficult to use for checking the collision of a single pose efficiently; since the functionality was originally part of the ROS ``base\_local\_planner'' (see \autoref{subsec:base_local_planner}), it was designed for checking a set of controls from the current robot pose and not a given state that was part of a path segment. It also did not have support for forward simulating, while checking for collisions, a desired state along one of the path segments used in this thesis, but could only forward simulate a set of constant velocity commands (translational and rotational).
 
 To address these shortcomings in the existing ROS obstacle mapping, a new obstacle mapping component was developed for use by trajectory generation. This component, called ``costmap3d'' uses the OctoMap library \autocite{octomap} to allow efficient, hi-resolution 3D collision checking in large environments (see \autoref{fig:costmap3d_examples} for an example of an OctoMap created by ``costmap3d''). ``costmap3d'' improves three of the issues with the ROS obstacle mapping and collision checking mentioned above and in \autoref{subsec:costmap_2d}: simplistic integration of sensor measurements over time, efficiently representing large environments at small resolutions and a simple method for efficiently checking a single position in the map for collisions.
 
-The first two issues, simplistic integration of sensor measuremnts over time and efficiently representing large environments at small resolutions, are addressed via the use of the OctoMap library. OctoMap uses a probabilistic representation of sensor measurements (derived from the occupancy grid mapping techniques introduced in \autocite{Moravec_1985_1840}) to compute the probability of a given map cell being either free space or occupied. This means that the occupancy state of a map cell is based on all of the previous measurements that intersected with that cell and not simply the last measurement that did so (as is the case in ``costmap\_2d'').
+The first two issues, simplistic integration of sensor measurements over time and efficiently representing large environments at small resolutions, are addressed via the use of the OctoMap library. OctoMap uses a probabilistic representation of sensor measurements (derived from the occupancy grid mapping techniques introduced in \autocite{Moravec_1985_1840}) to compute the probability of a given map cell being either free space or occupied. This means that the occupancy state of a map cell is based on all of the previous measurements that intersected with that cell and not simply the last measurement that did so (as is the case in ``costmap\_2d'').
 
 \begin{figure}
 \centering
@@ -298,7 +298,7 @@ The first two issues, simplistic integration of sensor measuremnts over time and
 \caption[Example Octree Structure]{Example Octree Structure \autocite{octomap} \label{fig:octree_diagram}}
 \end{figure}
 
-OctoMap also solves the issue of efficiently representing large environments at small resolutions. It does so by using an octree representation for the map as opposed to a fixed size grid (where the cells can either be 2D as in the case of ``costmap\_2d'' or 3D as in the case of a voxel grid). Octrees, very similar to quadtrees used for 2D environments, are a nested, recursive datastructure where each voxel in the octree can be further subdivided into eight more voxels, thereby forming an octree inside of that voxel (see \autoref{fig:octree_diagram}). Because groups of smaller voxels with the same label can be represented by keeping the containing larger voxel, octrees can represent very large environments at high resolutions with little memory usage (compared to a traditional fixed size occupancy grid). For example, an empty hallway with a door at the end, a common environment for this precision navigation system, can easily be represented by an octree by maintaing the large, parent voxels in the empty hallway while using small voxels to represent the area near the doorway at a small enough resolution such that the doorway does not occlude free space simply because the grid size is too large. To do this, OctoMap regularly ``prunes'' the underlying octree occupancy map to merge groups of voxels that have the same occupancy label (e.g. free or obstalce) into a single, larger containing parent voxel with that same label. After pruning, there is no need to keep the children in memory as they are losslessly represented by the parent voxel; this greatly reduces the memory requirements for representing large environments at high resolution, especially if those environments can be grouped into clumps of free and occupied space.
+OctoMap also solves the issue of efficiently representing large environments at small resolutions. It does so by using an octree representation for the map as opposed to a fixed size grid (where the cells can either be 2D as in the case of ``costmap\_2d'' or 3D as in the case of a voxel grid). Octrees, very similar to quadtrees used for 2D environments, are a nested, recursive data structure where each voxel in the octree can be further subdivided into eight more voxels, thereby forming an octree inside of that voxel (see \autoref{fig:octree_diagram}). Because groups of smaller voxels with the same label can be represented by keeping the containing larger voxel, octrees can represent very large environments at high resolutions with little memory usage (compared to a traditional fixed size occupancy grid). For example, an empty hallway with a door at the end, a common environment for this precision navigation system, can easily be represented by an octree by maintaining the large, parent voxels in the empty hallway while using small voxels to represent the area near the doorway at a small enough resolution such that the doorway does not occlude free space simply because the grid size is too large. To do this, OctoMap regularly ``prunes'' the underlying octree occupancy map to merge groups of voxels that have the same occupancy label (e.g. free or obstacle) into a single, larger containing parent voxel with that same label. After pruning, there is no need to keep the children in memory as they are losslessly represented by the parent voxel; this greatly reduces the memory requirements for representing large environments at high resolution, especially if those environments can be grouped into clumps of free and occupied space.
 
 \begin{figure}
 \centering
