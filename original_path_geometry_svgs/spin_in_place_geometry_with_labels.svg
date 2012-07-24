@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Generator: Adobe Illustrator 16.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.1"
+   id="Layer_1"
+   x="0px"
+   y="0px"
+   width="259.95737"
+   height="151.875"
+   viewBox="0 0 259.95737 151.875"
+   enable-background="new 0 0 960 560"
+   xml:space="preserve"
+   inkscape:version="0.48.1 r9760"
+   sodipodi:docname="spin_in_place_geometry_with_labels.svg"><metadata
+   id="metadata3464"><rdf:RDF><cc:Work
+       rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
+         rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title></dc:title></cc:Work></rdf:RDF></metadata><defs
+   id="defs3462" /><sodipodi:namedview
+   pagecolor="#ffffff"
+   bordercolor="#666666"
+   borderopacity="1"
+   objecttolerance="10"
+   gridtolerance="10"
+   guidetolerance="10"
+   inkscape:pageopacity="0"
+   inkscape:pageshadow="2"
+   inkscape:window-width="1918"
+   inkscape:window-height="1028"
+   id="namedview3460"
+   showgrid="false"
+   inkscape:zoom="2.7400388"
+   inkscape:cx="83.231701"
+   inkscape:cy="45.570443"
+   inkscape:window-x="0"
+   inkscape:window-y="25"
+   inkscape:window-maximized="0"
+   inkscape:current-layer="Layer_1"
+   fit-margin-top="0"
+   fit-margin-left="0"
+   fit-margin-right="0"
+   fit-margin-bottom="0" />
+<line
+   stroke-miterlimit="10"
+   x1="100.88199"
+   y1="142.21951"
+   x2="0.50299072"
+   y2="71.28949"
+   id="line3442"
+   style="fill:#ffffff;stroke:#000000;stroke-miterlimit:10" />
+<line
+   stroke-miterlimit="10"
+   x1="100.88199"
+   y1="142.21951"
+   x2="138.24301"
+   y2="0.35850525"
+   id="line3444"
+   style="fill:none;stroke:#ff0000;stroke-miterlimit:10" />
+<line
+   stroke-miterlimit="10"
+   x1="138.02499"
+   y1="0.32449341"
+   x2="131.242"
+   y2="8.1515045"
+   id="line3446"
+   style="fill:none;stroke:#ff0000;stroke-miterlimit:10" />
+<line
+   stroke-miterlimit="10"
+   x1="138.09601"
+   y1="0.52850342"
+   x2="140.90601"
+   y2="9.9535065"
+   id="line3448"
+   style="fill:none;stroke:#ff0000;stroke-miterlimit:10" />
+<circle
+   stroke-miterlimit="10"
+   cx="454.39099"
+   cy="337.23999"
+   r="10.934"
+   id="circle3450"
+   sodipodi:cx="454.39099"
+   sodipodi:cy="337.23999"
+   sodipodi:rx="10.934"
+   sodipodi:ry="10.934"
+   style="fill:#ffffff;stroke:#000000;stroke-miterlimit:10"
+   transform="translate(-354,-196.8125)" />
+<polygon
+   stroke-miterlimit="10"
+   points="459.353,338.991 460.443,345.351 454.732,342.349 449.021,345.351 450.111,338.991 445.491,334.487 451.876,333.56 454.732,327.773 457.587,333.56 463.973,334.487 "
+   id="polygon3452"
+   style="fill:#ffffff;stroke:#ff0000;stroke-miterlimit:10"
+   transform="translate(-354,-196.8125)" />
+<line
+   stroke-miterlimit="10"
+   x1="0.69500732"
+   y1="71.443512"
+   x2="4.3049927"
+   y2="83.931488"
+   id="line3454"
+   style="fill:none;stroke:#000000;stroke-miterlimit:10" />
+<line
+   stroke-miterlimit="10"
+   x1="0"
+   y1="71.6875"
+   x2="13"
+   y2="71.6875"
+   id="line3456"
+   style="fill:none;stroke:#000000;stroke-miterlimit:10" />
+<path
+   stroke-miterlimit="10"
+   d="M 123.943,52.5895 C 87.3,37.0155 45.048,54.0645 29.474,90.7075"
+   id="path3458"
+   inkscape:connector-curvature="0"
+   style="fill:none;stroke:#000000;stroke-miterlimit:10" />
+<text
+   sodipodi:linespacing="125%"
+   id="text3443"
+   y="145.16629"
+   x="7.6439209"
+   style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+   xml:space="preserve"><tspan
+     y="145.16629"
+     x="7.6439209"
+     id="tspan3445"
+     sodipodi:role="line">desired_pose</tspan></text>
+<text
+   sodipodi:linespacing="125%"
+   id="text3431"
+   y="143.70645"
+   x="112.84738"
+   style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+   xml:space="preserve"><tspan
+     y="143.70645"
+     x="112.84738"
+     id="tspan3433"
+     sodipodi:role="line">reference_point</tspan></text>
+<flowRoot
+   transform="translate(-319.44303,-244.06352)"
+   xml:space="preserve"
+   id="flowRoot3024"
+   style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"><flowRegion
+     id="flowRegion3026"><rect
+       id="rect3028"
+       width="135.74196"
+       height="17.54841"
+       x="454.70969"
+       y="257.5484" /></flowRegion><flowPara
+     id="flowPara3030">initial_tangent_angle</flowPara></flowRoot><text
+   sodipodi:linespacing="125%"
+   id="text3439"
+   y="49.867371"
+   x="65.492004"
+   style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+   xml:space="preserve"><tspan
+     y="49.867371"
+     x="65.492004"
+     id="tspan3441"
+     sodipodi:role="line">l</tspan></text>
+</svg>
