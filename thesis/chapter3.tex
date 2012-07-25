@@ -1,4 +1,4 @@
-\section{Steering}\label{sec:steering}\todo{Wyatt, any references for steering/controls stuff that would be useful for this section?}
+\section{Steering}\label{sec:steering}
 
 Another major component of a navigation subsystem is the path execution component. There are a number of parts that make up a path execution component; in this thesis, there are three such components: steering, trajectory generation and path planning. The lowest-level component is steering. Steering's task is to take a desired robot state (this represents the ideal state of the robot at a given time) and the current robot state and, from those two inputs, produce a set of commands that will make the robot's current state converge on the desired state. The state of the robot is not simply a position and orientation, but also includes parameters such as translational and angular velocities and curvature.
 

@@ -1,4 +1,4 @@
-\section{Trajectory Generation}\label{sec:trajectory_generation}\todo{Wyatt, any references for trajectory generation stuff that would be useful for this section?}
+\section{Trajectory Generation}\label{sec:trajectory_generation}
 
 Another major component of the path execution subsystem developed in this thesis is trajectory generation. This component sits between the steering and path planning components, taking global paths from path planning and outputting desired states that the steering component attempts to achieve. The trajectory generator fills the same role as the base\_local\_planner described in \autoref{subsec:base_local_planner}. The input to the trajectory generator is an ordered sequence of path segments (called a \emph{path}). The path segments are described in \autoref{subsec:path_segment}. The output is a desired state for the current timestep, as described in \autoref{subsec:steering_state}.
 
