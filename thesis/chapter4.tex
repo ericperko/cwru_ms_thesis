@@ -41,7 +41,7 @@ Of the fields listed in \autoref{table:path_segment_description}, the ones requi
 
 As discussed in \autoref{subsec:steering_state}, the spin-in-place segment type was added to the original path segment types to avoid numerical instability issues when using arcs with very small radii.
 
-\subsection{Trajectory Generation Algorithm}\label{subsec:trajectory_generation_algorithm}
+\subsection{Trajectory Generation Algorithms}\label{subsec:trajectory_generation_algorithm}
 
 The trajectory generation algorithm used in this thesis is detailed in this section. On HARLIE, this loop ran at 20 Hz to regularly send commands to the steering algorithms detailed in \autoref{subsec:steering_algorithms}. Note that the trajectory generator and steering algorithm, while both run at 20 Hz, they are not explicitly synchronized. It should also be noted that, while many of these concepts are not limited to SE(2) space (position and rotation on the XY plane), these algorithms are written assuming SE(2) space and not a more generalized six degree of freedom system (SE(3) space).
 
@@ -271,7 +271,7 @@ $\Psi$  = $path\left[i_t\right].initial\_tangent\_angle$ \;
 
 See \autoref{fig:labeled_path_segment_geometry} for the geometric relationships between the fields listed in \autoref{table:path_segment_description} for each segment type; these geometric relationships are what \autoref{alg:compute_desired_pose_algorithm} is based on. For all of these figures, red denotes features that are described by the path segment while black features indicate features that are based on the current trajectory generator state. For example, in \autoref{fig:constant_curvature_arc_geometry}, the red line, labeled \textbf{r}, between the reference point and the desired pose represents the radius of the arc (or $1/curvature$) while the shorter black arc, labeled \textbf{l}, represents the trajectory generator's current distance along the path segment ($l_t$) and is what the labeled \textbf{desired\_pose} ($pose_t$) is calculated from.
 
-\subsection{Adding Feedback for Planning}\label{subsec:trajectory_generation_actionlib}
+\subsection{Feedback for Planning}\label{subsec:trajectory_generation_actionlib}
 
 In the original design of the trajectory generator, the outputs of \autoref{alg:trajectory_generation_algorithm} were not exposed outside of the trajectory generation subsystem. Things like the current path ($path$), the segment number being executed ($i_t$) and distance already traveled along that segment ($l_t$) were only fed back into \autoref{alg:trajectory_generation_algorithm}. This lack of information became a problem for the path planning system when it needed to replan around a dynamic (or otherwise unexpected) obstacle that invalidated the original path plan. In order to replan efficiently, the path planner needed to be aware of where along the previous path plan the trajectory generator was when it encountered the obstacle. Without that information, the path planner was unable to generate a new path plan that avoided the obstacle and was still smoothly blended with the segments of the original plan that were unaffected by the obstacle's presence. To provide the path planner with the information required, the trajectory generator output the $path$ it was currently using, the current segment being executed $i_t$ and the distance traveled along that segment $l_t$. With this information, the path planner could easily extrapolate exactly where the trajectory generator had commanded the robot before detecting the collision and efficiently modify the path to avoid that collision. On HARLIE, this feedback mechanism was implemented using the ROS ``actionlib'' library \autocite{ActionLibWiki}.
 
@@ -282,7 +282,7 @@ In the original design of the trajectory generator, the outputs of \autoref{alg:
 \subfloat[Side View, 20 cm Resolution]{\includegraphics[width=0.75\textwidth]{images/3rd_floor_side_20cm}\label{fig:costmap3d_examples_side_view}}
 \\
 \subfloat[Inside View, 2.5 cm Resolution]{\includegraphics[width=0.75\textwidth]{images/3rd_floor_inside_2_5cm}\label{fig:costmap3d_examples_inside_view}}
-\caption[Costmap3D Examples]{Costmap3D Examples. These are from an OctoMap built from 3D sensor data of the Glennan 3rd Floor while using Costmap3D.}
+\caption[costmap3d Examples]{Costmap3D Examples. These are from an OctoMap built from 3D sensor data of the Glennan 3rd Floor while using Costmap3D.}
 \label{fig:costmap3d_examples}
 \end{figure}
 
@@ -303,7 +303,7 @@ OctoMap also solves the issue of efficiently representing large environments at 
 \begin{figure}
 \centering
 \includegraphics[width=0.75\textwidth]{images/harlie_collision_box}
-\caption{HARLIE ``costmap3d'' Collision Box Example \label{fig:harlie_collision_box_example}}
+\caption{HARLIE costmap3d Collision Box Example \label{fig:harlie_collision_box_example}}
 \end{figure}
 
 Though OctoMap solves the obstacle mapping issues of ``costmap\_2d'' described above, the OctoMap library itself does not have any facilities for efficiently checking a given robot pose for collisions. OctoMap does provide functionality for getting the occupancy state of a given point, but no facilities for checking something like the bounding box of the robot at a given pose. That is the exact functionality provided by the ``costmap3d'' component developed for this thesis. The ``costmap3d'' contains an OctoMap of the environment (constantly being updated with new sensor data) and provides a simple function for checking for collisions at a given robot pose, given the robot's height, width and length (these define the robot's bounding box). To do this, it approximates the faces of the bounding box with a dense set of points and checks each point (see \autoref{fig:harlie_collision_box_example} for an example HARLIE's set of points) -- as soon as a single point is in collision, ``costmap3d'' can stop checking and return that that pose would be in collision. For HARLIE, the points were generated at a resolution of five centimeters and the ``costmap3d'' checked up to ten forward simulated states in the trajectory generation loop that was running at 20 Hz. The ``costmap3d'' library was also used successfully by Chad Rockey for 3D collision checking on a smart wheelchair \autocite{Rockey2012}.
