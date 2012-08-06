@@ -3,6 +3,7 @@ project(Thesis NONE)
 
 set(LATEX_CHAPTER_SOURCES
 	title.tex
+	committee_approval_sheet.tex
 	acknowledgements.tex
 	abstract.tex
 	chapter0.tex
