@@ -18,7 +18,7 @@ Another issue with the implementation used by costmap\_2d is that, with a very f
 
 \subsection{Local Planning}\label{subsec:base_local_planner}
 
-For local planning, the ROS navigation stack uses a software package called ``base\_local\_planner" \autocite{BaseLocalPlannerWiki}. This package uses the occupancy grid built by the package described in \autoref{subsec:costmap_2d} to generate steering commands (translational velocity and rotational velocity) such that the robot follows a given path through the environment without collisions. To do this, base\_local\_planner, as configured for HARLIE, uses an algorithm called Trajectory Rollout \autocite{Gerkey_Konolige_2008}. The algorithm can be described as a sequence of four steps that are repeated until the robot reaches the end of the path. The steps are as follows:
+For local planning, the ROS navigation stack uses a software package called ``base\_lo\-cal\_planner" \autocite{BaseLocalPlannerWiki}. This package uses the occupancy grid built by the package described in \autoref{subsec:costmap_2d} to generate steering commands (translational velocity and rotational velocity) such that the robot follows a given path through the environment without collisions. To do this, base\_local\_planner, as configured for HARLIE, uses an algorithm called Trajectory Rollout \autocite{Gerkey_Konolige_2008}. The algorithm can be described as a sequence of four steps that are repeated until the robot reaches the end of the path. The steps are as follows:
 \begin{enumerate}
 \item Sample the robot's control space, generate translational (forward) velocity and rotational velocity pairs. These pairs are the possible commands that could be sent to the robot, given its current state and dynamics constraints (e.g. acceleration).
 \item Forward simulate each of those control pairs for some short, fixed amount of time to determine what would happen if the robot were given that control pair. One forward simulated control pair creates one possible trajectory.
@@ -26,7 +26,7 @@ For local planning, the ROS navigation stack uses a software package called ``ba
 \item Pick the trajectory that scores the best (this could be lowest or highest score depending on cost function) and send the control pair that generated that trajectory to the robot.
 \end{enumerate}
 
-The scoring function used by the Trajectory Rollout implementation in base\_local\_planner is as follows:
+The scoring function used by the Trajectory Rollout implementation in base\_lo\-cal\_planner is as follows:
 \begin{equation}
 	k_{path} \cdot pathDist + k_{goal} \cdot goalDist + k_{obs} \cdot obs \label{eq:base_local_planner_cost_func}
 \end{equation}
